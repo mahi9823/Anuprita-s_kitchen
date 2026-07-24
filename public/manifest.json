@@ -1,0 +1,27 @@
+{
+  "id": "/",
+  "short_name": "Anuprita's Kitchen",
+  "name": "Anuprita's Kitchen - Pure Veg Catering",
+  "description": "100% Pure Veg Home Catering & Tiffin Service",
+  "icons": [
+    {
+      "src": "/app_icon.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/app_icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "background_color": "#1c1917",
+  "theme_color": "#ea580c",
+  "display": "standalone",
+  "orientation": "portrait",
+  "categories": ["food", "lifestyle"]
+}
