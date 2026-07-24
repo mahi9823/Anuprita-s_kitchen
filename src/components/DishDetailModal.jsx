@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Clock, Star, Flame, Check, Plus, Minus, ChefHat, Lock, Calendar, Dumbbell, Activity } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Clock, Star, Flame, Check, Plus, Minus, ChefHat, Lock, Calendar, Dumbbell, Activity, PlusCircle } from 'lucide-react';
 import VegSymbol from './VegSymbol';
 
 export default function DishDetailModal({ 
@@ -11,10 +11,27 @@ export default function DishDetailModal({
 }) {
   if (!item) return null;
 
+  const [selectedAddOns, setSelectedAddOns] = useState({});
+
   // 2-Day Advance Cutoff Logic calculation
   const publishedDate = item.publishedAt ? new Date(item.publishedAt).getTime() : Date.now();
   const daysDiff = (Date.now() - publishedDate) / (1000 * 60 * 60 * 24);
   const isOrderClosed = item.advanceNoticeDays ? (daysDiff > item.advanceNoticeDays) : false;
+
+  const handleToggleAddOn = (addon) => {
+    setSelectedAddOns((prev) => {
+      const updated = { ...prev };
+      if (updated[addon.id]) {
+        delete updated[addon.id];
+      } else {
+        updated[addon.id] = addon;
+      }
+      return updated;
+    });
+  };
+
+  const addOnsTotal = Object.values(selectedAddOns).reduce((sum, addon) => sum + addon.price, 0);
+  const itemUnitPrice = item.price + addOnsTotal;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -50,7 +67,7 @@ export default function DishDetailModal({
           </div>
         </div>
 
-        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '70vh', overflowY: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1c1917' }}>
@@ -68,13 +85,62 @@ export default function DishDetailModal({
             </div>
 
             <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#16a34a' }}>
-              ₹{item.price}
+              ₹{itemUnitPrice}
             </div>
           </div>
 
           <p style={{ fontSize: '0.9rem', color: '#44403c', lineHeight: 1.5 }}>
             {lang === 'mr' ? item.descriptionMr : item.descriptionEn}
           </p>
+
+          {/* EXTRA ADD-ONS CUSTOMIZER SECTION */}
+          {item.extraAddOns && item.extraAddOns.length > 0 && (
+            <div style={{ background: '#fff7ed', border: '1.5px solid #fed7aa', borderRadius: '14px', padding: '14px' }}>
+              <h4 style={{ fontSize: '0.88rem', fontWeight: 800, color: '#9a3412', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <PlusCircle size={16} color="#ea580c" />
+                <span>{lang === 'mr' ? '➕ अतिरिक्त घटक जोडा (Extra Custom Add-ons):' : '➕ Select Extra Custom Add-ons:'}</span>
+              </h4>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {item.extraAddOns.map((addon) => {
+                  const isChecked = !!selectedAddOns[addon.id];
+                  return (
+                    <label 
+                      key={addon.id} 
+                      onClick={() => handleToggleAddOn(addon)}
+                      style={{
+                        display: 'flex',
+                        justify: 'space-between',
+                        alignItems: 'center',
+                        background: isChecked ? '#ffedd5' : 'white',
+                        border: isChecked ? '1.5px solid #ea580c' : '1px solid #e7e5e4',
+                        padding: '8px 10px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={isChecked} 
+                          onChange={() => {}} 
+                          style={{ width: '16px', height: '16px', accentColor: '#ea580c' }} 
+                        />
+                        <span style={{ fontSize: '0.82rem', fontWeight: isChecked ? 800 : 600, color: '#292524' }}>
+                          {lang === 'mr' ? addon.nameMr : addon.nameEn}
+                        </span>
+                      </div>
+
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ea580c' }}>
+                        +₹{addon.price}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* NUTRITIONAL BREAKDOWN BOX */}
           <div style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '14px', padding: '14px' }}>
@@ -157,7 +223,7 @@ export default function DishDetailModal({
                 {lang === 'mr' ? 'एकूण मू्ल्य:' : 'Price:'}
               </span>
               <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#16a34a' }}>
-                ₹{item.price * Math.max(cartQty, 1)}
+                ₹{itemUnitPrice * Math.max(cartQty, 1)}
               </div>
             </div>
 

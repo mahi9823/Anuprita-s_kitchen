@@ -8,6 +8,22 @@ export const INITIAL_CATEGORIES = [
   { id: 'sweets', nameMr: 'गोड पदार्थ व सण खास', nameEn: 'Sweets & Festival Special', icon: 'Cake' },
 ];
 
+export const COMMON_THALI_ADDONS = [
+  { id: 'add-bhakri', nameMr: 'अतिरिक्त १ बाजरी/ज्वारी भाकरी', nameEn: 'Extra 1 Bajra/Jowar Bhakri', price: 25 },
+  { id: 'add-chapati', nameMr: 'अतिरिक्त १ गरमागरम पोळी/चपाती', nameEn: 'Extra 1 Chapati', price: 15 },
+  { id: 'add-solkadhi', nameMr: 'अतिरिक्त ताजी सोलकढी ग्लास', nameEn: 'Extra Solkadhi Glass', price: 30 },
+  { id: 'add-amti', nameMr: 'अतिरिक्त कटाची आमटी / रस्सा वाटी', nameEn: 'Extra Katachi Amti Bowl', price: 40 },
+  { id: 'add-paneer', nameMr: 'अतिरिक्त शाही पनीर वाटी', nameEn: 'Extra Shahi Paneer Bowl', price: 60 },
+  { id: 'add-thecha', nameMr: 'अतिरिक्त खरडा ठेचा व पापड', nameEn: 'Extra Kharda Thecha & Papad', price: 15 }
+];
+
+export const COMMON_SNACK_ADDONS = [
+  { id: 'add-butter', nameMr: 'अतिरिक्त ताजे पांढरे लोणी', nameEn: 'Extra White Butter Scoop', price: 20 },
+  { id: 'add-curd', nameMr: 'अतिरिक्त घट्ट दही वाटी', nameEn: 'Extra Thick Curd Bowl', price: 20 },
+  { id: 'add-pav', nameMr: 'अतिरिक्त १ मऊ लादी पाव', nameEn: 'Extra 1 Pav Bun', price: 10 },
+  { id: 'add-sambar', nameMr: 'अतिरिक्त खमंग सांबार वाटी', nameEn: 'Extra Sambar Bowl', price: 25 }
+];
+
 export const TIFFIN_PACKAGES = [
   {
     id: 'tif-monthly',
@@ -88,7 +104,8 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'झणझणीत खानदेशी मसालेदार शेव भाजी, २ टम्म फुगलेल्या गरम बाजरी भाकरी, हिरव्या मिरचीचा खरडा ठेचा, वरण भात, कांदा व पापड.',
     descriptionEn: 'Spicy Khandeshi Shev Bhaji curry, 2 hot Bajra Bhakris, Green Chili Kharda Thecha, Dal Rice, Onion & Papad.',
     ingredientsMr: ['बेसन शेव', 'खानदेशी काळा मसाला रस्सा', '२ बाजरी भाकरी', 'खरडा ठेचा', 'वरण भात', 'कांदा-पापड'],
-    ingredientsEn: ['Gram Flour Shev', 'Khandeshi Spicy Gravy', '2 Bajra Bhakris', 'Kharda Thecha', 'Dal Rice', 'Onion & Papad']
+    ingredientsEn: ['Gram Flour Shev', 'Khandeshi Spicy Gravy', '2 Bajra Bhakris', 'Kharda Thecha', 'Dal Rice', 'Onion & Papad'],
+    extraAddOns: COMMON_THALI_ADDONS
   },
   {
     id: 'item-1',
@@ -115,7 +132,11 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'साजूक तुपातील २ मऊ पुरणपोळ्या, झणझणीत कटाची आमटी, बटाटा भाजी, वाफेचा भात, पापड आणि कोशिंबीर.',
     descriptionEn: '2 Soft Puran Polis dipped in pure ghee, served with Katachi Amti, potato bhaji, rice, papad & salad.',
     ingredientsMr: ['चना डाळ', 'गूळ', 'गहू पीठ', 'साजूक तूप', 'वेलची/जयफळ', 'मसाले'],
-    ingredientsEn: ['Chana Dal', 'Jaggery', 'Wheat Flour', 'Pure Desi Ghee', 'Cardamom', 'Spices']
+    ingredientsEn: ['Chana Dal', 'Jaggery', 'Wheat Flour', 'Pure Desi Ghee', 'Cardamom', 'Spices'],
+    extraAddOns: [
+      { id: 'add-puranpoli', nameMr: 'अतिरिक्त १ साजूक तुपातील पुरणपोळी', nameEn: 'Extra 1 Puran Poli with Ghee', price: 50 },
+      ...COMMON_THALI_ADDONS
+    ]
   },
   {
     id: 'item-3',
@@ -142,7 +163,8 @@ export const INITIAL_ITEMS = [
     descriptionMr: '२ ज्वारीची भाकरी/चपाती, शाही पनीर मसाला, भरली वांगी, वरण-भात, कोथिंबीर वडी व ताजी सोलकढी.',
     descriptionEn: '2 Jowar Bhakris/Chapatis, Shahi Paneer, Stuffed Brinjal, Dal Rice, Kothimbir Vadi & Fresh Solkadhi.',
     ingredientsMr: ['ज्वारी', 'पनीर', 'वांगी', 'तूअर डाळ', 'नारळ', 'सोलकढी', 'मसाले'],
-    ingredientsEn: ['Jowar', 'Paneer', 'Brinjal', 'Toor Dal', 'Coconut', 'Kokum Solkadhi', 'Spices']
+    ingredientsEn: ['Jowar', 'Paneer', 'Brinjal', 'Toor Dal', 'Coconut', 'Kokum Solkadhi', 'Spices'],
+    extraAddOns: COMMON_THALI_ADDONS
   },
   {
     id: 'item-4',
@@ -169,7 +191,8 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'गरमागरम बेसन पिठलं, २ टम्म फुगलेल्या बाजरी/ज्वारी भाकरी, हिरव्या मिरचीचा तणतणीत ठेचा, शेंगदाणा चटणी व कांदा.',
     descriptionEn: 'Hot Besan Pithla, 2 Bajra/Jowar Bhakris, Spicy Green Chili Kharda Thecha, Peanut Chutney & Onion.',
     ingredientsMr: ['बेसन', 'ज्वारी/बाजरी', 'हिरवी मिरची', 'लसूण', 'शेंगदाणा चटणी', 'कोथिंबीर'],
-    ingredientsEn: ['Gram Flour', 'Jowar/Bajra', 'Green Chili', 'Garlic', 'Peanut Chutney', 'Coriander']
+    ingredientsEn: ['Gram Flour', 'Jowar/Bajra', 'Green Chili', 'Garlic', 'Peanut Chutney', 'Coriander'],
+    extraAddOns: COMMON_THALI_ADDONS
   },
   {
     id: 'item-bhajniche-thalipith',
@@ -196,7 +219,8 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'घरगुती भाजणीच्या पिठाचे कांदा-तिळाचे खमंग थालीपीठ, ताजे पांढरे लोणी, घट्ट दही व हिरव्या मिरचीचा ठेचा.',
     descriptionEn: 'Traditional Maharashtrian multigrain bhajni flatbread cooked with onions & sesame, served with white butter, curd & green chili thecha.',
     ingredientsMr: ['धपाटे/भाजणी पीठ', 'कांदा', 'तीळ', 'ओवा', 'कोथिंबीर', 'पांढरे लोणी', 'दही व ठेचा'],
-    ingredientsEn: ['Multigrain Bhajni Flour', 'Onion', 'Sesame Seeds', 'Ajwain', 'Fresh Coriander', 'White Butter', 'Curd & Thecha']
+    ingredientsEn: ['Multigrain Bhajni Flour', 'Onion', 'Sesame Seeds', 'Ajwain', 'Fresh Coriander', 'White Butter', 'Curd & Thecha'],
+    extraAddOns: COMMON_SNACK_ADDONS
   },
   {
     id: 'item-soft-idli-sambar',
@@ -223,7 +247,11 @@ export const INITIAL_ITEMS = [
     minOrderQty: 1,
     image: '/images/idli_sambar_1784903222164.jpg',
     descriptionMr: 'ताज्या पीठाच्या मऊ वाफेवरील ४ इडल्या, खमंग सांबार व नारळाची चटणी. २ दिवस आधी ऑर्डर बुक करणे आवश्यक (२ दिवसांनी ऑर्डर बंद होईल).',
-    descriptionEn: 'Fluffy steamed rice idlis served with piping hot vegetable sambar & coconut chutney. Requires 2 days advance booking.'
+    descriptionEn: 'Fluffy steamed rice idlis served with piping hot vegetable sambar & coconut chutney. Requires 2 days advance booking.',
+    extraAddOns: [
+      { id: 'add-idli', nameMr: 'अतिरिक्त १ मऊ इडली', nameEn: 'Extra 1 Idli', price: 15 },
+      ...COMMON_SNACK_ADDONS
+    ]
   },
   {
     id: 'item-wada-pav',
@@ -250,7 +278,11 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'झणझणीत बटाटा वाडा, मऊ लादी पाव, तळलेली हिरवी मिरची व लाल लसणाची सुकी चटणी.',
     descriptionEn: 'Authentic Mumbai Batata Wada served inside soft pav with fried green chili & spicy red garlic chutney.',
     ingredientsMr: ['पाव', 'उकडलेला बटाटा', 'बेसन', 'हिरवी मिरची', 'लसूण चटणी', 'मोहरी-कढीपत्ता'],
-    ingredientsEn: ['Pav Bun', 'Boiled Potato', 'Gram Flour', 'Green Chili', 'Garlic Chutney', 'Mustard-Curry Leaves']
+    ingredientsEn: ['Pav Bun', 'Boiled Potato', 'Gram Flour', 'Green Chili', 'Garlic Chutney', 'Mustard-Curry Leaves'],
+    extraAddOns: [
+      { id: 'add-wada', nameMr: 'अतिरिक्त १ गरमागरम बटाटा वाडा', nameEn: 'Extra 1 Wada', price: 20 },
+      ...COMMON_SNACK_ADDONS
+    ]
   },
   {
     id: 'item-bread-pakoda',
@@ -277,7 +309,8 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'बटाट्याची खमंग भाजी भरून बेसनाच्या घोळात तळलेला कुरकुरीत ब्रेड पकोडा, हिरवी चटणी व सॉससोबत.',
     descriptionEn: 'Crispy deep-fried bread stuffed with spiced potato filling, served with spicy green chutney & tomato ketchup.',
     ingredientsMr: ['ब्रेड', 'उकडलेला बटाटा', 'बेसन', 'हिरवी मिरची', 'आलं-लसूण', 'कोथिंबीर', 'मसाले'],
-    ingredientsEn: ['Bread', 'Boiled Potato', 'Gram Flour', 'Green Chili', 'Ginger-Garlic', 'Coriander', 'Spices']
+    ingredientsEn: ['Bread', 'Boiled Potato', 'Gram Flour', 'Green Chili', 'Ginger-Garlic', 'Coriander', 'Spices'],
+    extraAddOns: COMMON_SNACK_ADDONS
   },
   {
     id: 'item-bread-sandwich',
@@ -304,7 +337,11 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'उकडलेला बटाटा, टोमॅटो, काकडी, बीट व चीज भरलेला कुरकुरीत ग्रिल्ड टोस्ट सँडविच, पुदिना चटणीसोबत.',
     descriptionEn: 'Crispy grilled toast sandwich stuffed with spiced potatoes, cucumber, tomatoes, beetroot & butter, served with green chutney.',
     ingredientsMr: ['ब्रेड टोस्ट', 'बटाटा', 'काकडी', 'टोमॅटो', 'चीज/बटर', 'पुदिना चटणी'],
-    ingredientsEn: ['Toast Bread', 'Potato', 'Cucumber', 'Tomato', 'Cheese/Butter', 'Mint Chutney']
+    ingredientsEn: ['Toast Bread', 'Potato', 'Cucumber', 'Tomato', 'Cheese/Butter', 'Mint Chutney'],
+    extraAddOns: [
+      { id: 'add-cheese', nameMr: 'अतिरिक्त चीज स्लाईस (Cheese Slice)', nameEn: 'Extra Cheese Slice', price: 20 },
+      ...COMMON_SNACK_ADDONS
+    ]
   },
   {
     id: 'item-5',
@@ -331,7 +368,8 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'ताजी कोथिंबीर आणि बेसनाची वाफेवर उकडवून तडतडीत तिळाची फोडणी दिलेली खमंग वडी.',
     descriptionEn: 'Steamed coriander and gram flour cakes shallow-fried with sesame seeds and spices.',
     ingredientsMr: ['ताजी कोथिंबीर', 'बेसन', 'तीळ', 'हिरवी मिरची', 'आलं-लसूण'],
-    ingredientsEn: ['Fresh Coriander', 'Gram Flour', 'Sesame Seeds', 'Green Chili', 'Ginger-Garlic']
+    ingredientsEn: ['Fresh Coriander', 'Gram Flour', 'Sesame Seeds', 'Green Chili', 'Ginger-Garlic'],
+    extraAddOns: COMMON_SNACK_ADDONS
   },
   {
     id: 'item-upvas-1',
@@ -358,7 +396,10 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'साबुदाणे, उकडलेले बटाटे आणि भाजलेल्या दाण्याचा कूट वापरून बनवलेली कुरकुरीत उपवास वडी व गोड दही.',
     descriptionEn: 'Crispy tapioca & potato patties with crushed peanuts, served with sweet curd & chili chutney.',
     ingredientsMr: ['साबुदाणा', 'बटाटा', 'शेंगदाणा कूट', 'सैंधव मीठ', 'जिरे', 'हिरवी मिरची'],
-    ingredientsEn: ['Tapioca Pearls', 'Potato', 'Crushed Peanuts', 'Sendha Salt', 'Cumin', 'Green Chili']
+    ingredientsEn: ['Tapioca Pearls', 'Potato', 'Crushed Peanuts', 'Sendha Salt', 'Cumin', 'Green Chili'],
+    extraAddOns: [
+      { id: 'add-curd-upvas', nameMr: 'अतिरिक्त उपवास दही वाटी', nameEn: 'Extra Sweet Curd Bowl', price: 20 }
+    ]
   },
   {
     id: 'item-upvas-2',
@@ -385,7 +426,10 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'साजूक तुपात फोडणी दिलेली मोकळी-सळसळीत साबूदाणा खिचडी, खमंग दाण्याचा कूट, जिरे व कोथिंबीर.',
     descriptionEn: 'Authentic Sabudana Khichdi cooked in pure desi ghee with roasted crushed peanuts, cumin & green chilis.',
     ingredientsMr: ['साबुदाणा', 'साजूक तूप', 'भाजलेला शेंगदाणा कूट', 'जिरे', 'हिरवी मिरची', 'सैंधव मीठ'],
-    ingredientsEn: ['Tapioca Pearls', 'Pure Desi Ghee', 'Roasted Peanut Powder', 'Cumin', 'Green Chili', 'Sendha Salt']
+    ingredientsEn: ['Tapioca Pearls', 'Pure Desi Ghee', 'Roasted Peanut Powder', 'Cumin', 'Green Chili', 'Sendha Salt'],
+    extraAddOns: [
+      { id: 'add-curd-upvas', nameMr: 'अतिरिक्त उपवास दही वाटी', nameEn: 'Extra Sweet Curd Bowl', price: 20 }
+    ]
   },
   {
     id: 'item-upvas-3',
@@ -412,7 +456,10 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'ताज्या रताळ्याचा किसून साजूक तुपात फोडणी दिलेला चविष्ट कीस, दाण्याचा कूट, ओला नारळ आणि जिरे.',
     descriptionEn: 'Grated sweet potato hash sautéed in pure ghee with crushed peanuts, fresh coconut & green chilis.',
     ingredientsMr: ['ताजी रताळी', 'साजूक तूप', 'शेंगदाणा कूट', 'ओला नारळ', 'हिरवी मिरची', 'सैंधव मीठ'],
-    ingredientsEn: ['Fresh Sweet Potatoes', 'Desi Ghee', 'Crushed Peanuts', 'Grated Coconut', 'Green Chili', 'Sendha Salt']
+    ingredientsEn: ['Fresh Sweet Potatoes', 'Desi Ghee', 'Crushed Peanuts', 'Grated Coconut', 'Green Chili', 'Sendha Salt'],
+    extraAddOns: [
+      { id: 'add-curd-upvas', nameMr: 'अतिरिक्त उपवास दही वाटी', nameEn: 'Extra Sweet Curd Bowl', price: 20 }
+    ]
   },
   {
     id: 'item-7',
@@ -439,7 +486,8 @@ export const INITIAL_ITEMS = [
     descriptionMr: 'म्हशीच्या घट्ट दुधाची आटवलेली केशर-चारोळीयुक्त बासुंदी किंवा मऊ रसरशीत खवा गुलाबजामुन.',
     descriptionEn: 'Rich thickened milk Basundi with saffron & charoli nuts, or melt-in-mouth Mawa Gulab Jamuns.',
     ingredientsMr: ['म्हैस दूध', 'केसर', 'चारोळी', 'साखर', 'वेलची', 'खवा'],
-    ingredientsEn: ['Buffalo Milk', 'Saffron', 'Charoli Nuts', 'Sugar', 'Cardamom', 'Mawa']
+    ingredientsEn: ['Buffalo Milk', 'Saffron', 'Charoli Nuts', 'Sugar', 'Cardamom', 'Mawa'],
+    extraAddOns: []
   }
 ];
 
