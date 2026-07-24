@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, CheckCircle, Clock, TrendingUp, ShoppingBag, Package, Power, Save, PhoneCall, Sparkles, Leaf, User, Phone, MapPin, Trash2, Lock, Coffee, Sun, Moon, MessageSquare, Check, AlertCircle, Utensils, IndianRupee, CheckCircle2, XCircle, Calendar, DollarSign, Camera, Image as ImageIcon, Smartphone, Users, Cloud, CheckCircle2 as CloudCheck } from 'lucide-react';
+import { Plus, Edit2, CheckCircle, Clock, TrendingUp, ShoppingBag, Package, Power, Save, PhoneCall, Sparkles, Leaf, User, Phone, MapPin, Trash2, Lock, Coffee, Sun, Moon, MessageSquare, Check, AlertCircle, Utensils, IndianRupee, CheckCircle2, XCircle, Calendar, DollarSign, Camera, Image as ImageIcon, Smartphone, Users, Cloud, CheckCircle2 as CloudCheck, Flame, Dumbbell } from 'lucide-react';
 import { pushStateToCloud } from '../services/cloudSync';
 
 const PRESET_APP_PHOTOS = [
+  { label: 'शेवभाजी व बाजरी भाकरी थाळी (Shev Bhaji)', url: '/images/shev_bhaji_thali_1784915706656.jpg' },
   { label: 'भाजणीचे थालीपीठ (Thalipith)', url: '/images/thalipith_1784915295277.jpg' },
   { label: 'दाक्षिणात्य इडली सांबार (Idli Sambar)', url: '/images/idli_sambar_1784903222164.jpg' },
   { label: 'पुरणपोळी थाळी (Puran Poli Thali)', url: '/images/puran_poli_thali_1784869158979.jpg' },
@@ -45,13 +46,15 @@ export default function OwnerAdmin({
   // New Item State
   const [newTitleMr, setNewTitleMr] = useState('');
   const [newTitleEn, setNewTitleEn] = useState('');
-  const [newCategory, setNewCategory] = useState('snacks');
+  const [newCategory, setNewCategory] = useState('thali');
   const [newPrice, setNewPrice] = useState('');
-  const [newUnit, setNewUnit] = useState('प्लेट (Plate)');
+  const [newUnit, setNewUnit] = useState('थाळी (Plate)');
   const [newAdvanceDays, setNewAdvanceDays] = useState('1'); 
+  const [newCalories, setNewCalories] = useState('480');
+  const [newProtein, setNewProtein] = useState('15g');
   const [newDescMr, setNewDescMr] = useState('');
   const [newThaliMenuMr, setNewThaliMenuMr] = useState('ताजे घरगुती शाकाहारी साहित्य');
-  const [newImage, setNewImage] = useState('/images/thalipith_1784915295277.jpg');
+  const [newImage, setNewImage] = useState('/images/shev_bhaji_thali_1784915706656.jpg');
 
   // Manual Order State
   const [custName, setCustName] = useState('');
@@ -62,7 +65,7 @@ export default function OwnerAdmin({
 
   // Daily menu editor state
   const [breakfastVal, setBreakfastVal] = useState(todayMenu?.breakfast || 'भाजणीचे थालीपीठ, इ़डली सांबार व वाडा पाव');
-  const [lunchVal, setLunchVal] = useState(todayMenu?.lunch || 'पनीर मसाला + भरली वांगी + वरण भात');
+  const [lunchVal, setLunchVal] = useState(todayMenu?.lunch || 'खानदेशी शेव भाजी + बाजरी भाकरी थाळी');
   const [dinnerVal, setDinnerVal] = useState(todayMenu?.dinner || 'बेसन पिठलं + शेव भाजी + ज्वारी भाकरी');
 
   // Edit price inline
@@ -261,13 +264,15 @@ export default function OwnerAdmin({
       inStock: true,
       rating: 5.0,
       reviewsCount: 1,
+      calories: parseInt(newCalories, 10) || 480,
+      protein: newProtein || '14g',
       advanceNoticeDays: advanceDaysNum,
       publishedAt: new Date().toISOString(),
       advanceNoticeMr: `${advanceDaysNum} दिवस आधी ऑर्डर द्या`,
       advanceNoticeEn: `${advanceDaysNum} Days Advance Notice Required`,
       prepTime: '२० मि',
       minOrderQty: 1,
-      image: newImage || '/images/thalipith_1784915295277.jpg',
+      image: newImage || '/images/shev_bhaji_thali_1784915706656.jpg',
       descriptionMr: newDescMr || `घरगुती शाकाहारी स्वादाचा विशेष पदार्थ.`,
       descriptionEn: newDescMr || `Special home-cooked pure veg dish.`,
       ingredientsMr: thaliList.length > 0 ? thaliList : ['शुद्ध शाकाहारी साहित्य', 'घरगुती मसाले'],
@@ -829,11 +834,9 @@ export default function OwnerAdmin({
                   {lang === 'en' ? item.titleEn : item.titleMr}
                 </h4>
 
-                <div style={{ fontSize: '0.72rem', color: '#78716c', marginTop: '2px' }}>
-                  <strong>{lang === 'en' ? 'Notice Limit:' : 'ऑर्डर मुदत:'}</strong>{' '}
-                  <span style={{ color: '#ea580c', fontWeight: 800 }}>
-                    {item.advanceNoticeDays ? `${item.advanceNoticeDays} दिवस आधी` : '१ दिवस आधी'}
-                  </span>
+                <div style={{ fontSize: '0.72rem', color: '#78716c', marginTop: '2px', display: 'flex', gap: '8px' }}>
+                  <span>🔥 {item.calories || 450} kcal</span>
+                  <span>💪 {item.protein || '14g'}</span>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
@@ -989,7 +992,7 @@ export default function OwnerAdmin({
         ))}
       </div>
 
-      {/* Add Item / Thali Modal with Compressed Photo Upload & Advance Notice Setting */}
+      {/* Add Item / Thali Modal with Compressed Photo Upload & Advance Notice & Nutrition Setting */}
       {showAddModal && (
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -1002,6 +1005,23 @@ export default function OwnerAdmin({
               <div className="form-group">
                 <label className="form-label">{lang === 'en' ? 'Item Name (Marathi) *' : 'पदार्थाचे नाव (मराठी) *'}</label>
                 <input type="text" required className="form-input" placeholder="उदा. खमंग भाजणीचे थालीपीठ" value={newTitleMr} onChange={(e) => setNewTitleMr(e.target.value)} />
+              </div>
+
+              {/* NUTRITION CALORIES & PROTEIN INPUTS */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', background: '#f8fafc', padding: '8px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.72rem', color: '#dc2626', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <Flame size={12} /> {lang === 'en' ? 'Calories (kcal)' : 'उष्मांक (कॅलरीज)'}
+                  </label>
+                  <input type="number" className="form-input" placeholder="520" value={newCalories} onChange={(e) => setNewCalories(e.target.value)} />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <Dumbbell size={12} /> {lang === 'en' ? 'Protein (e.g. 16g)' : 'प्रथिने (उदा. 16g)'}
+                  </label>
+                  <input type="text" className="form-input" placeholder="16g" value={newProtein} onChange={(e) => setNewProtein(e.target.value)} />
+                </div>
               </div>
 
               {/* ADVANCE NOTICE DAYS SETTING (e.g. 2 Days Cutoff) */}
@@ -1071,8 +1091,8 @@ export default function OwnerAdmin({
                 <div className="form-group">
                   <label className="form-label">{lang === 'en' ? 'Category' : 'वर्ग (Category)'}</label>
                   <select className="form-select" value={newCategory} onChange={(e) => setNewCategory(e.target.value)}>
-                    <option value="snacks">नाश्ता (Snacks)</option>
                     <option value="thali">थाळी (Thali)</option>
+                    <option value="snacks">नाश्ता (Snacks)</option>
                     <option value="sweets">गोड पदार्थ (Sweets)</option>
                     <option value="upvas">उपवास (Upvas)</option>
                   </select>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Plus, Minus, Info, Calendar, Clock, Lock, AlertCircle } from 'lucide-react';
+import { Star, Plus, Minus, Info, Calendar, Clock, Lock, AlertCircle, Flame, Dumbbell } from 'lucide-react';
 import VegSymbol from './VegSymbol';
 
 export default function FoodCard({ 
@@ -66,12 +66,24 @@ export default function FoodCard({
             >
               {lang === 'mr' ? item.titleMr : item.titleEn}
             </h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+
+            {/* CALORIES & PROTEIN NUTRITION BADGES */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px', flexWrap: 'wrap' }}>
               <span className="unit-tag">{lang === 'mr' ? item.unit : item.unitEn}</span>
-              <span style={{ fontSize: '0.65rem', color: isOrderClosed ? '#dc2626' : '#ea580c', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px', background: isOrderClosed ? '#fef2f2' : '#fff7ed', padding: '2px 5px', borderRadius: '4px' }}>
-                <Calendar size={10} />
-                <span>{item.advanceNoticeMr || (lang === 'mr' ? '१ दिवस आधी नोंदवा' : 'Order 1 Day Prior')}</span>
-              </span>
+
+              {item.calories && (
+                <span style={{ fontSize: '0.68rem', color: '#dc2626', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '2px', background: '#fef2f2', padding: '1px 6px', borderRadius: '6px', border: '1px solid #fecaca' }}>
+                  <Flame size={10} color="#dc2626" />
+                  <span>{item.calories} kcal</span>
+                </span>
+              )}
+
+              {item.protein && (
+                <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '2px', background: '#f0fdf4', padding: '1px 6px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
+                  <Dumbbell size={10} color="#16a34a" />
+                  <span>{item.protein} {lang === 'mr' ? 'प्रथिने' : 'Protein'}</span>
+                </span>
+              )}
             </div>
           </div>
 
@@ -101,7 +113,7 @@ export default function FoodCard({
             }}
           >
             <Info size={13} />
-            <span>{lang === 'mr' ? 'साहित्य पाहा' : 'Ingredients'}</span>
+            <span>{lang === 'mr' ? 'पोषण मूल्य पाहा' : 'Nutrition Details'}</span>
           </button>
 
           {isOrderClosed ? (
@@ -111,7 +123,7 @@ export default function FoodCard({
               style={{ background: '#9ca3af', color: 'white', cursor: 'not-allowed', border: 'none', padding: '6px 12px', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}
             >
               <Lock size={12} />
-              <span>{lang === 'mr' ? 'ऑर्डर बंद (२ दिवस संपले)' : 'Order Closed'}</span>
+              <span>{lang === 'mr' ? 'ऑर्डर बंद' : 'Order Closed'}</span>
             </button>
           ) : !item.inStock ? (
             <button 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Clock, Star, Flame, Check, Plus, Minus, ChefHat, Lock, Calendar } from 'lucide-react';
+import { X, Clock, Star, Flame, Check, Plus, Minus, ChefHat, Lock, Calendar, Dumbbell, Activity } from 'lucide-react';
 import VegSymbol from './VegSymbol';
 
 export default function DishDetailModal({ 
@@ -76,6 +76,52 @@ export default function DishDetailModal({
             {lang === 'mr' ? item.descriptionMr : item.descriptionEn}
           </p>
 
+          {/* NUTRITIONAL BREAKDOWN BOX */}
+          <div style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '14px', padding: '14px' }}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Activity size={16} color="#ea580c" />
+              <span>{lang === 'mr' ? 'पोषण मूल्य व उष्मांक (Nutritional Facts per serving):' : 'Nutritional Facts per serving:'}</span>
+            </h4>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px', textAlign: 'center' }}>
+              <div style={{ background: '#fef2f2', padding: '8px 4px', borderRadius: '10px', border: '1px solid #fecaca' }}>
+                <span style={{ fontSize: '0.65rem', color: '#991b1b', fontWeight: 700, display: 'block' }}>
+                  🔥 {lang === 'mr' ? 'कॅलरीज' : 'Calories'}
+                </span>
+                <strong style={{ fontSize: '0.95rem', color: '#dc2626' }}>
+                  {item.calories || 450} <span style={{ fontSize: '0.6rem' }}>kcal</span>
+                </strong>
+              </div>
+
+              <div style={{ background: '#f0fdf4', padding: '8px 4px', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
+                <span style={{ fontSize: '0.65rem', color: '#166534', fontWeight: 700, display: 'block' }}>
+                  💪 {lang === 'mr' ? 'प्रथिने' : 'Protein'}
+                </span>
+                <strong style={{ fontSize: '0.95rem', color: '#16a34a' }}>
+                  {item.protein || '14g'}
+                </strong>
+              </div>
+
+              <div style={{ background: '#fff7ed', padding: '8px 4px', borderRadius: '10px', border: '1px solid #fed7aa' }}>
+                <span style={{ fontSize: '0.65rem', color: '#9a3412', fontWeight: 700, display: 'block' }}>
+                  🌾 {lang === 'mr' ? 'कार्बोहायड्रेट' : 'Carbs'}
+                </span>
+                <strong style={{ fontSize: '0.95rem', color: '#ea580c' }}>
+                  {item.carbs || '55g'}
+                </strong>
+              </div>
+
+              <div style={{ background: '#fefce8', padding: '8px 4px', borderRadius: '10px', border: '1px solid #fef08a' }}>
+                <span style={{ fontSize: '0.65rem', color: '#854d0e', fontWeight: 700, display: 'block' }}>
+                  🥑 {lang === 'mr' ? 'स्निग्धता' : 'Fats'}
+                </span>
+                <strong style={{ fontSize: '0.95rem', color: '#ca8a04' }}>
+                  {item.fat || '12g'}
+                </strong>
+              </div>
+            </div>
+          </div>
+
           {/* Ingredients list */}
           {item.ingredientsMr && item.ingredientsMr.length > 0 && (
             <div style={{ background: '#ecfdf5', border: '1px dashed #a7f3d0', borderRadius: '12px', padding: '14px' }}>
@@ -122,7 +168,7 @@ export default function DishDetailModal({
                 style={{ background: '#9ca3af', color: 'white', cursor: 'not-allowed', border: 'none', padding: '10px 16px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <Lock size={16} />
-                <span>{lang === 'mr' ? 'ऑर्डर बंद (२ दिवस संपले)' : 'Order Closed'}</span>
+                <span>{lang === 'mr' ? 'ऑर्डर बंद' : 'Order Closed'}</span>
               </button>
             ) : cartQty === 0 ? (
               <button className="add-btn" onClick={() => onUpdateCart(item.id, 1)} style={{ background: '#16a34a' }}>
