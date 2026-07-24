@@ -52,6 +52,29 @@ export const TIFFIN_PACKAGES = [
 
 export const INITIAL_ITEMS = [
   {
+    id: 'item-shev-bhaji-thali',
+    titleMr: 'खानदेशी झणझणीत शेवभाजी व बाजरी भाकरी थाळी',
+    titleEn: 'Special Khandeshi Shev Bhaji & Bajra Bhakri Thali',
+    category: 'thali',
+    price: 230,
+    unit: 'थाळी (Plate)',
+    unitEn: 'Plate',
+    isVeg: true,
+    isUpvas: false,
+    isBestseller: true,
+    inStock: true,
+    rating: 5.0,
+    reviewsCount: 198,
+    advanceNoticeMr: '१ दिवस आधी ऑर्डर द्या',
+    advanceNoticeEn: 'Order 1 Day in Advance',
+    minOrderQty: 1,
+    image: '/images/shev_bhaji_thali_1784915706656.jpg',
+    descriptionMr: 'झणझणीत खानदेशी मसालेदार शेव भाजी, २ टम्म फुगलेल्या गरम बाजरी भाकरी, हिरव्या मिरचीचा खरडा ठेचा, वरण भात, कांदा व पापड.',
+    descriptionEn: 'Spicy Khandeshi Shev Bhaji curry, 2 hot Bajra Bhakris, Green Chili Kharda Thecha, Dal Rice, Onion & Papad.',
+    ingredientsMr: ['बेसन शेव', 'खानदेशी काळा मसाला रस्सा', '२ बाजरी भाकरी', 'खरडा ठेचा', 'वरण भात', 'कांदा-पापड'],
+    ingredientsEn: ['Gram Flour Shev', 'Khandeshi Spicy Gravy', '2 Bajra Bhakris', 'Kharda Thecha', 'Dal Rice', 'Onion & Papad']
+  },
+  {
     id: 'item-bhajniche-thalipith',
     titleMr: 'खमंग भाजणीचे थालीपीठ (२ नग)',
     titleEn: 'Authentic Bhajniche Thalipith with Butter (2 pcs)',
