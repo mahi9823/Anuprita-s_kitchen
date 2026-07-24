@@ -19,17 +19,17 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v23 for Shev Bhaji Thali sync
-    const versionKey = 'anuprita_kitchen_v23_shev_bhaji_thali';
+    // Force reset cache version key to v24 for unique nutrition sync
+    const versionKey = 'anuprita_kitchen_v24_unique_nutrition';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v23', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v24', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v23');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v24');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
@@ -43,12 +43,12 @@ export default function App() {
   });
 
   const [cartItems, setCartItems] = useState(() => {
-    const saved = localStorage.getItem('anuprita_kitchen_cart_v23');
+    const saved = localStorage.getItem('anuprita_kitchen_cart_v24');
     return saved ? JSON.parse(saved) : {};
   });
 
   const [ordersList, setOrdersList] = useState(() => {
-    const saved = localStorage.getItem('anuprita_kitchen_orders_v23');
+    const saved = localStorage.getItem('anuprita_kitchen_orders_v24');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -96,7 +96,7 @@ export default function App() {
         }
         setLastCloudSyncTime(new Date().toLocaleTimeString());
       } else {
-        // Seed cloud database with latest menu including Shev Bhaji Thali!
+        // Seed cloud database with latest menu including unique nutrition data!
         pushStateToCloud(INITIAL_ITEMS, todayMenu);
       }
       setIsSyncingCloud(false);
@@ -157,7 +157,7 @@ export default function App() {
     setItems(itemsToSave);
     setTodayMenu(todayMenuToSave);
 
-    localStorage.setItem('anuprita_kitchen_items_v23', JSON.stringify(itemsToSave));
+    localStorage.setItem('anuprita_kitchen_items_v24', JSON.stringify(itemsToSave));
     localStorage.setItem('anuprita_kitchen_today_menu', JSON.stringify(todayMenuToSave));
 
     // Upload to Cloud Database so all customer devices receive the update immediately!
@@ -167,15 +167,15 @@ export default function App() {
   };
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_items_v23', JSON.stringify(items));
+    localStorage.setItem('anuprita_kitchen_items_v24', JSON.stringify(items));
   }, [items]);
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_cart_v23', JSON.stringify(cartItems));
+    localStorage.setItem('anuprita_kitchen_cart_v24', JSON.stringify(cartItems));
   }, [cartItems]);
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_orders_v23', JSON.stringify(ordersList));
+    localStorage.setItem('anuprita_kitchen_orders_v24', JSON.stringify(ordersList));
   }, [ordersList]);
 
   useEffect(() => {
