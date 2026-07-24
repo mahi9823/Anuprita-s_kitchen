@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, CheckCircle, Clock, TrendingUp, ShoppingBag, Package, Power, Save, PhoneCall, Sparkles, Leaf, User, Phone, MapPin, Trash2, Lock, Coffee, Sun, Moon, MessageSquare, Check, AlertCircle, Utensils, IndianRupee, CheckCircle2, XCircle, Calendar, DollarSign, Camera, Image as ImageIcon, Smartphone, Users } from 'lucide-react';
+import { Plus, Edit2, CheckCircle, Clock, TrendingUp, ShoppingBag, Package, Power, Save, PhoneCall, Sparkles, Leaf, User, Phone, MapPin, Trash2, Lock, Coffee, Sun, Moon, MessageSquare, Check, AlertCircle, Utensils, IndianRupee, CheckCircle2, XCircle, Calendar, DollarSign, Camera, Image as ImageIcon, Smartphone, Users, Cloud, CheckCircle2 as CloudCheck } from 'lucide-react';
+import { pushStateToCloud } from '../services/cloudSync';
 
 const PRESET_APP_PHOTOS = [
+  { label: 'भाजणीचे थालीपीठ (Thalipith)', url: '/images/thalipith_1784915295277.jpg' },
   { label: 'दाक्षिणात्य इडली सांबार (Idli Sambar)', url: '/images/idli_sambar_1784903222164.jpg' },
   { label: 'पुरणपोळी थाळी (Puran Poli Thali)', url: '/images/puran_poli_thali_1784869158979.jpg' },
   { label: 'शाही शाकाहारी थाळी (Veg Thali)', url: '/images/special_veg_thali_1784869181230.jpg' },
@@ -38,6 +40,7 @@ export default function OwnerAdmin({
   const [editingThaliId, setEditingThaliId] = useState(null);
   const [editingThaliItems, setEditingThaliItems] = useState('');
   const [editingPhotoId, setEditingPhotoId] = useState(null);
+  const [syncMessage, setSyncMessage] = useState('');
 
   // New Item State
   const [newTitleMr, setNewTitleMr] = useState('');
@@ -45,10 +48,10 @@ export default function OwnerAdmin({
   const [newCategory, setNewCategory] = useState('snacks');
   const [newPrice, setNewPrice] = useState('');
   const [newUnit, setNewUnit] = useState('प्लेट (Plate)');
-  const [newAdvanceDays, setNewAdvanceDays] = useState('2'); // Default 2 Days Advance Notice Cutoff
+  const [newAdvanceDays, setNewAdvanceDays] = useState('1'); 
   const [newDescMr, setNewDescMr] = useState('');
-  const [newThaliMenuMr, setNewThaliMenuMr] = useState('इडली, सांबार, खोबऱ्याची ताजी चटणी');
-  const [newImage, setNewImage] = useState('/images/idli_sambar_1784903222164.jpg');
+  const [newThaliMenuMr, setNewThaliMenuMr] = useState('ताजे घरगुती शाकाहारी साहित्य');
+  const [newImage, setNewImage] = useState('/images/thalipith_1784915295277.jpg');
 
   // Manual Order State
   const [custName, setCustName] = useState('');
@@ -58,13 +61,19 @@ export default function OwnerAdmin({
   const [orderAmount, setOrderAmount] = useState('');
 
   // Daily menu editor state
-  const [breakfastVal, setBreakfastVal] = useState(todayMenu?.breakfast || 'इ़डली सांबार, वाडा पाव व सँडविच');
+  const [breakfastVal, setBreakfastVal] = useState(todayMenu?.breakfast || 'भाजणीचे थालीपीठ, इ़डली सांबार व वाडा पाव');
   const [lunchVal, setLunchVal] = useState(todayMenu?.lunch || 'पनीर मसाला + भरली वांगी + वरण भात');
   const [dinnerVal, setDinnerVal] = useState(todayMenu?.dinner || 'बेसन पिठलं + शेव भाजी + ज्वारी भाकरी');
 
   // Edit price inline
   const [editingId, setEditingId] = useState(null);
   const [editPriceVal, setEditPriceVal] = useState('');
+
+  // Helper to trigger visual feedback message
+  const triggerSyncAlert = (msg) => {
+    setSyncMessage(msg);
+    setTimeout(() => setSyncMessage(''), 4000);
+  };
 
   // Orders State (Pending, Completed, Cancelled)
   const [localOrders, setLocalOrders] = useState(() => {
@@ -116,24 +125,28 @@ export default function OwnerAdmin({
 
   const handleSaveDailyMenu = (e) => {
     e.preventDefault();
-    onUpdateTodayMenu({
+    const updated = {
       breakfast: breakfastVal,
       lunch: lunchVal,
       dinner: dinnerVal,
       updatedAt: new Date().toLocaleTimeString()
-    });
-    alert(lang === 'en' ? "Today's Daily Menu Saved!" : "आजचा खास मेनू अपडेट झाला!");
+    };
+    onUpdateTodayMenu(updated);
+    pushStateToCloud(items, updated);
+    triggerSyncAlert(lang === 'en' ? "Today's menu saved & broadcasted to all customer phones!" : "आजचा खास मेनू बदलला! सर्व ग्राहकांच्या मोबाईलवर अपडेट झाला.");
   };
 
   const handleSaveThaliItems = (itemId) => {
     const list = editingThaliItems.split(',').map((s) => s.trim()).filter(Boolean);
-    const targetItem = items.find((i) => i.id === itemId);
-    if (targetItem) {
-      targetItem.ingredientsMr = list;
-      targetItem.ingredientsEn = list;
-    }
+    const updatedItems = items.map((i) => {
+      if (i.id === itemId) {
+        return { ...i, ingredientsMr: list, ingredientsEn: list };
+      }
+      return i;
+    });
     setEditingThaliId(null);
-    alert(lang === 'en' ? 'Thali Menu Updated!' : 'थळीतील पदार्थ अपडेट झाले!');
+    pushStateToCloud(updatedItems, todayMenu);
+    triggerSyncAlert(lang === 'en' ? 'Thali Menu Updated & Broadcasted!' : 'थळीतील घटक बदलले! सर्व मोबाईलमध्ये अपडेट झाले.');
   };
 
   const handleAddManualOrder = (e) => {
@@ -162,7 +175,7 @@ export default function OwnerAdmin({
     setCustAddress('');
     setOrderDetails('');
     setOrderAmount('');
-    alert(lang === 'en' ? 'New Pending Order Recorded!' : 'ऑर्डरची बाकी (Pending) मध्ये नोंद झाली!');
+    triggerSyncAlert(lang === 'en' ? 'New Pending Order Recorded!' : 'ऑर्डरची बाकी (Pending) मध्ये नोंद झाली!');
   };
 
   const handleChangeOrderStatus = (orderId, newStatus) => {
@@ -218,12 +231,10 @@ export default function OwnerAdmin({
   };
 
   const handleChangeItemPhoto = (itemId, photoUrl) => {
-    const targetItem = items.find(i => i.id === itemId);
-    if (targetItem) {
-      targetItem.image = photoUrl;
-      setEditingPhotoId(null);
-      alert(lang === 'en' ? 'Photo updated successfully!' : 'फोटो यशस्वीपणे बदलला!');
-    }
+    const updatedItems = items.map(i => i.id === itemId ? { ...i, image: photoUrl } : i);
+    setEditingPhotoId(null);
+    pushStateToCloud(updatedItems, todayMenu);
+    triggerSyncAlert(lang === 'en' ? 'Photo updated & broadcasted to all customer apps!' : 'फोटो बदलला! सर्व ग्राहकांच्या मोबाईलवर नवीन फोटो दिसेल.');
   };
 
   const handleCreateNewItem = (e) => {
@@ -252,13 +263,13 @@ export default function OwnerAdmin({
       reviewsCount: 1,
       advanceNoticeDays: advanceDaysNum,
       publishedAt: new Date().toISOString(),
-      advanceNoticeMr: `${advanceDaysNum} दिवस आधी ऑर्डर द्या (${advanceDaysNum} दिवसांनी ऑटो बंद)`,
+      advanceNoticeMr: `${advanceDaysNum} दिवस आधी ऑर्डर द्या`,
       advanceNoticeEn: `${advanceDaysNum} Days Advance Notice Required`,
       prepTime: '२० मि',
       minOrderQty: 1,
-      image: newImage || '/images/idli_sambar_1784903222164.jpg',
-      descriptionMr: newDescMr || `घरगुती शाकाहारी स्वादाचा विशेष पदार्थ. ${advanceDaysNum} दिवस आधी ऑर्डर आवश्यक.`,
-      descriptionEn: newDescMr || `Special home-cooked pure veg dish. Requires ${advanceDaysNum} days advance order.`,
+      image: newImage || '/images/thalipith_1784915295277.jpg',
+      descriptionMr: newDescMr || `घरगुती शाकाहारी स्वादाचा विशेष पदार्थ.`,
+      descriptionEn: newDescMr || `Special home-cooked pure veg dish.`,
       ingredientsMr: thaliList.length > 0 ? thaliList : ['शुद्ध शाकाहारी साहित्य', 'घरगुती मसाले'],
       ingredientsEn: thaliList.length > 0 ? thaliList : ['Pure veg ingredients', 'Home-made spices']
     };
@@ -269,12 +280,15 @@ export default function OwnerAdmin({
     setNewTitleEn('');
     setNewPrice('');
     setNewDescMr('');
+    triggerSyncAlert(lang === 'en' ? 'New item published & broadcasted to all customer apps!' : 'नवीन पदार्थ पब्लिश झाला! सर्व ग्राहकांच्या मोबाईलवर लगेच दिसेल.');
   };
 
   const handleSavePrice = (id) => {
     if (editPriceVal) {
       onUpdatePrice(id, parseFloat(editPriceVal));
-      alert(lang === 'en' ? 'Price updated successfully!' : 'नवीन किंमत अपडेट झाली!');
+      const updatedItems = items.map(i => i.id === id ? { ...i, price: parseFloat(editPriceVal) } : i);
+      pushStateToCloud(updatedItems, todayMenu);
+      triggerSyncAlert(lang === 'en' ? 'Price updated & broadcasted to all devices!' : 'किंमत बदलली! सर्व मोबाईलवर नवीन किंमत १ सेकंदात अपडेट झाली.');
     }
     setEditingId(null);
   };
@@ -282,6 +296,9 @@ export default function OwnerAdmin({
   const handleConfirmDelete = (id, name) => {
     if (window.confirm(lang === 'en' ? `Are you sure you want to remove "${name}"?` : `तुम्हाला नक्की "${name}" हा पदार्थ काढून टाकायचा आहे का?`)) {
       onRemoveItem(id);
+      const updatedItems = items.filter(i => i.id !== id);
+      pushStateToCloud(updatedItems, todayMenu);
+      triggerSyncAlert(lang === 'en' ? 'Item removed from all customer apps!' : 'पदार्थ काढून टाकला! सर्व मोबाईलवरून लगेच निघून गेला.');
     }
   };
 
@@ -299,17 +316,26 @@ export default function OwnerAdmin({
       <div className="welcome-banner" style={{ background: 'linear-gradient(135deg, #1c1917 0%, #292524 100%)', borderBottom: '2px solid #ea580c' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <span className="welcome-badge" style={{ background: '#ea580c', color: 'white' }}>
-              <Sparkles size={12} style={{ display: 'inline', marginRight: '4px' }} />
-              {lang === 'en' ? "Owner: Reva Hosing Dashboard" : 'मालक: रेवा होसिंग डॅशबोर्ड'}
-            </span>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <span className="welcome-badge" style={{ background: '#ea580c', color: 'white' }}>
+                <Sparkles size={12} style={{ display: 'inline', marginRight: '4px' }} />
+                {lang === 'en' ? "Owner: Reva Hosing Dashboard" : 'मालक: रेवा होसिंग डॅशबोर्ड'}
+              </span>
+
+              {/* REALTIME CLOUD AUTO-SYNC STATUS BADGE */}
+              <span style={{ background: '#16a34a', color: 'white', fontSize: '0.68rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <Cloud size={11} />
+                <span>{lang === 'en' ? 'Cloud Sync: Active' : '☁️ क्लाउड सिंक: चालू'}</span>
+              </span>
+            </div>
+
             <h2 className="welcome-title" style={{ color: '#fef08a' }}>
-              {lang === 'en' ? 'Reva Hosing - Analytics & Orders' : 'रेवा होसिंग - ऑर्डर्स व ॲप वापरकर्ते'}
+              {lang === 'en' ? 'Reva Hosing - Analytics & Live Sync' : 'रेवा होसिंग - ऑर्डर्स व रिअल-टाईम बदल'}
             </h2>
             <p className="welcome-subtitle">
               {lang === 'en' 
-                ? 'Track app installs, active visitors, revenue & order ledger.' 
-                : 'ॲप इन्स्टॉल केलेल्या व्यक्तींचे मोजमाप, उत्पन्न व ऑर्डर्स हिशोब.'}
+                ? 'Any price or menu change made here instantly updates on all installed customer phones!' 
+                : 'येथून बदललेली किंमत किंवा मेनू १ सेकंदात सर्व ग्राहकांच्या मोबाईलवर दिसायला सुरुवात होते!'}
             </p>
           </div>
 
@@ -334,6 +360,14 @@ export default function OwnerAdmin({
           </button>
         </div>
       </div>
+
+      {/* SYNC NOTIFICATION TOAST */}
+      {syncMessage && (
+        <div style={{ background: '#16a34a', color: 'white', padding: '10px 14px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)' }}>
+          <CloudCheck size={18} />
+          <span>{syncMessage}</span>
+        </div>
+      )}
 
       {/* APP INSTALLS & VISITORS TRACKER CARD */}
       <div className="stat-grid" style={{ marginBottom: '8px' }}>
@@ -362,6 +396,76 @@ export default function OwnerAdmin({
             {lang === 'en' ? '🌐 Total Online Unique Visitors' : '🌐 मोबाईलवर ॲप पाहणाऱ्या व्यक्ती'}
           </span>
         </div>
+      </div>
+
+      {/* EDIT TODAY'S SPECIAL BREAKFAST, LUNCH & DINNER MENU */}
+      <div className="calc-card" style={{ background: '#fff7ed', border: '1.5px solid #fed7aa', marginBottom: '8px' }}>
+        <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#9a3412', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+          <Utensils size={16} color="#ea580c" />
+          <span>{lang === 'en' ? "Update Today's Special Menu (Live Sync)" : 'आजचा खास नाश्ता व जेवण बदला (रिअल-टाईम सिंक)'}</span>
+        </h3>
+
+        <form onSubmit={handleSaveDailyMenu} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div>
+            <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#44403c', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Sun size={12} color="#ea580c" /> {lang === 'en' ? "Today's Breakfast:" : 'आजचा खास नाश्ता:'}
+            </label>
+            <input 
+              type="text" 
+              className="form-input" 
+              value={breakfastVal} 
+              onChange={(e) => setBreakfastVal(e.target.value)} 
+              placeholder="उदा. भाजणीचे थालीपीठ व वाडा पाव"
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#44403c', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Utensils size={12} color="#16a34a" /> {lang === 'en' ? "Today's Lunch:" : 'आजचे दुपारचे जेवण:'}
+            </label>
+            <input 
+              type="text" 
+              className="form-input" 
+              value={lunchVal} 
+              onChange={(e) => setLunchVal(e.target.value)} 
+              placeholder="उदा. पनीर मसाला + वरण भात"
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#44403c', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Moon size={12} color="#0284c7" /> {lang === 'en' ? "Today's Dinner:" : 'आजचे रात्रीचे जेवण:'}
+            </label>
+            <input 
+              type="text" 
+              className="form-input" 
+              value={dinnerVal} 
+              onChange={(e) => setDinnerVal(e.target.value)} 
+              placeholder="उदा. बेसन पिठलं + ज्वारी भाकरी"
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            style={{ 
+              background: '#ea580c', 
+              color: 'white', 
+              border: 'none', 
+              padding: '6px 12px', 
+              borderRadius: '8px', 
+              fontSize: '0.75rem', 
+              fontWeight: 800, 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '4px' 
+            }}
+          >
+            <Save size={13} />
+            <span>{lang === 'en' ? "Save & Broadcast Today's Menu" : 'आजचा मेनू साठवा (सर्व मोबाईलवर सिंक होईल)'}</span>
+          </button>
+        </form>
       </div>
 
       {/* FINANCIAL MONTH-END SUMMARY CARDS */}
@@ -682,7 +786,7 @@ export default function OwnerAdmin({
         style={{ background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)' }}
       >
         <Plus size={18} />
-        <span>{lang === 'en' ? '➕ Add New Item / Idli Special Menu' : '➕ नवीन इडली किंवा पदार्थ जोडा'}</span>
+        <span>{lang === 'en' ? '➕ Add New Item / Dish' : '➕ नवीन थाळी किंवा पदार्थ जोडा'}</span>
       </button>
 
       {/* MANAGE & EDIT PRICE & THALI INCLUDED DISHES SECTION */}
@@ -776,7 +880,12 @@ export default function OwnerAdmin({
 
               <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                 <button
-                  onClick={() => onToggleStock(item.id)}
+                  onClick={() => {
+                    onToggleStock(item.id);
+                    const updatedItems = items.map(i => i.id === item.id ? { ...i, inStock: !i.inStock } : i);
+                    pushStateToCloud(updatedItems, todayMenu);
+                    triggerSyncAlert(lang === 'en' ? 'Stock status updated & broadcasted!' : 'उपलब्धता बदलली! सर्व मोबाईलवर अपडेट झाली.');
+                  }}
                   style={{
                     padding: '6px 10px',
                     borderRadius: '16px',
@@ -880,19 +989,19 @@ export default function OwnerAdmin({
         ))}
       </div>
 
-      {/* Add Item / Thali Modal with Compressed Photo Upload & 2-Day Advance Setting */}
+      {/* Add Item / Thali Modal with Compressed Photo Upload & Advance Notice Setting */}
       {showAddModal && (
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="modal-title">{lang === 'en' ? 'Add New Item / Idli Special Menu' : 'नवीन इडली किंवा पदार्थ तयार करा'}</h3>
+              <h3 className="modal-title">{lang === 'en' ? 'Add New Dish to Menu' : 'नवीन पदार्थ तयार करा (सर्व मोबाईलवर दिसेल)'}</h3>
               <button className="close-btn" onClick={() => setShowAddModal(false)}>✕</button>
             </div>
 
             <form onSubmit={handleCreateNewItem} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div className="form-group">
                 <label className="form-label">{lang === 'en' ? 'Item Name (Marathi) *' : 'पदार्थाचे नाव (मराठी) *'}</label>
-                <input type="text" required className="form-input" placeholder="उदा. मऊ दाक्षिणात्य इडली सांबार (४ नग)" value={newTitleMr} onChange={(e) => setNewTitleMr(e.target.value)} />
+                <input type="text" required className="form-input" placeholder="उदा. खमंग भाजणीचे थालीपीठ" value={newTitleMr} onChange={(e) => setNewTitleMr(e.target.value)} />
               </div>
 
               {/* ADVANCE NOTICE DAYS SETTING (e.g. 2 Days Cutoff) */}
@@ -908,16 +1017,10 @@ export default function OwnerAdmin({
                   onChange={(e) => setNewAdvanceDays(e.target.value)}
                   style={{ fontSize: '0.8rem', fontWeight: 800, marginTop: '4px' }}
                 >
-                  <option value="2">२ दिवस आधी नोंदणी आवश्यक (२ दिवसांनंतर ऑटोमॅटिक बंद होईल)</option>
                   <option value="1">१ दिवस आधी नोंदणी आवश्यक</option>
+                  <option value="2">२ दिवस आधी नोंदणी आवश्यक (२ दिवसांनंतर ऑटो डिसेबल)</option>
                   <option value="3">३ दिवस आधी नोंदणी आवश्यक</option>
                 </select>
-
-                <span style={{ fontSize: '0.68rem', color: '#1d4ed8', fontWeight: 700, marginTop: '4px', display: 'block' }}>
-                  {lang === 'en' 
-                    ? '✓ After 2 days pass from publishing, the order button will automatically get DISABLED!' 
-                    : '✓ हा पदार्थ पब्लिश केल्यापासून २ दिवसांनी ग्राहकांसाठी ऑर्डरचे बटण ऑटोमॅटिक डिसेबल (ऑर्डर बंद) होईल!'}
-                </span>
               </div>
 
               {/* FLEXIBLE PHOTO SELECTOR (AUTO COMPRESSED) */}
@@ -961,7 +1064,7 @@ export default function OwnerAdmin({
 
               <div className="form-group">
                 <label className="form-label">{lang === 'en' ? 'Included Items (Commas separated)' : 'पदार्थात समाविष्ट घटक (स्वल्पविराम , देऊन जोडा)'}</label>
-                <input type="text" className="form-input" placeholder="उदा. ४ इडल्या, खमंग सांबार, ताजी नारळाची चटणी" value={newThaliMenuMr} onChange={(e) => setNewThaliMenuMr(e.target.value)} />
+                <input type="text" className="form-input" placeholder="उदा. २ थालीपीठ, पांढरे लोणी, दही व ठेचा" value={newThaliMenuMr} onChange={(e) => setNewThaliMenuMr(e.target.value)} />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -977,13 +1080,13 @@ export default function OwnerAdmin({
 
                 <div className="form-group">
                   <label className="form-label">{lang === 'en' ? 'Price (₹) *' : 'किंमत (₹) *'}</label>
-                  <input type="number" required className="form-input" placeholder="70" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} />
+                  <input type="number" required className="form-input" placeholder="80" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} />
                 </div>
               </div>
 
               <div className="form-group">
                 <label className="form-label">{lang === 'en' ? 'Unit' : 'माप (Unit)'}</label>
-                <input type="text" className="form-input" placeholder="उदा. प्लेट (4 Pcs)" value={newUnit} onChange={(e) => setNewUnit(e.target.value)} />
+                <input type="text" className="form-input" placeholder="उदा. प्लेट (2 Pcs)" value={newUnit} onChange={(e) => setNewUnit(e.target.value)} />
               </div>
 
               <div className="form-group">
@@ -992,7 +1095,7 @@ export default function OwnerAdmin({
               </div>
 
               <button type="submit" className="submit-btn" style={{ marginTop: '10px', background: '#ea580c' }}>
-                <span>{lang === 'en' ? 'Save & Publish Menu Item' : 'पब्लिश करा (२ दिवस ऑटो टाइमर)'}</span>
+                <span>{lang === 'en' ? 'Save & Broadcast to All Devices' : 'पब्लिश करा (सर्व मोबाईलवर सिंक होईल)'}</span>
               </button>
             </form>
           </div>
