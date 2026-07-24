@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, CheckCircle, Clock, TrendingUp, ShoppingBag, Package, Power, Save, PhoneCall, Sparkles, Leaf, User, Phone, MapPin, Trash2, Lock, Coffee, Sun, Moon, MessageSquare, Check, AlertCircle, Utensils, IndianRupee, CheckCircle2, XCircle, Calendar, DollarSign, Camera, Image as ImageIcon, Smartphone, Users, Cloud, CheckCircle2 as CloudCheck, Flame, Dumbbell } from 'lucide-react';
+import { Plus, Edit2, CheckCircle, Clock, TrendingUp, ShoppingBag, Package, Power, Save, PhoneCall, Sparkles, Leaf, User, Phone, MapPin, Trash2, Lock, Coffee, Sun, Moon, MessageSquare, Check, AlertCircle, Utensils, IndianRupee, CheckCircle2, XCircle, Calendar, DollarSign, Camera, Image as ImageIcon, Smartphone, Users, Cloud, CheckCircle2 as CloudCheck, Flame, Dumbbell, Navigation, Map } from 'lucide-react';
 import { pushStateToCloud } from '../services/cloudSync';
 
 const PRESET_APP_PHOTOS = [
@@ -78,6 +78,21 @@ export default function OwnerAdmin({
     setTimeout(() => setSyncMessage(''), 4000);
   };
 
+  // Helper to open Google Maps turn-by-turn navigation for any address string
+  const handleOpenGoogleMapNav = (addressStr) => {
+    if (!addressStr) return;
+    
+    // Check if address already contains a direct Google Maps URL
+    const gpsMatch = addressStr.match(/https?:\/\/[^\s]+/);
+    if (gpsMatch) {
+      window.open(gpsMatch[0], '_blank');
+    } else {
+      const encodedAddress = encodeURIComponent(addressStr);
+      const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+      window.open(googleMapsUrl, '_blank');
+    }
+  };
+
   // Orders State (Pending, Completed, Cancelled)
   const [localOrders, setLocalOrders] = useState(() => {
     if (ordersList && ordersList.length > 0) return ordersList;
@@ -108,7 +123,7 @@ export default function OwnerAdmin({
         id: 'ORD-1001',
         customerName: 'प्रिया कुलकर्णी (Priya Kulkarni)',
         customerPhone: '9422567890',
-        customerAddress: 'घर नं ४५, बाणेर, पुणे',
+        customerAddress: 'घर नं ४५, बाणेर, पुणे [📍 GPS: https://maps.google.com/?q=18.5590,73.7868]',
         itemsSummary: '१x महिना डबा योजना (Monthly Tiffin)',
         total: 3600,
         date: new Date().toLocaleDateString(),
@@ -663,10 +678,37 @@ export default function OwnerAdmin({
                   <strong>{lang === 'en' ? 'Items:' : 'ऑर्डर मेनू:'}</strong> {ord.itemsSummary || (ord.items ? ord.items.map(i => i.name + ' x' + i.qty).join(', ') : 'घरगुती ऑर्डर')}
                 </div>
 
+                {/* CLICKABLE GOOGLE MAPS DELIVERY ADDRESS BUTTON FOR DELIVERY BOY */}
                 {ord.customerAddress && (
-                  <div style={{ fontSize: '0.72rem', color: '#78716c', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <MapPin size={11} color="#ea580c" />
-                    <span>{ord.customerAddress}</span>
+                  <div 
+                    onClick={() => handleOpenGoogleMapNav(ord.customerAddress)}
+                    style={{ 
+                      fontSize: '0.75rem', 
+                      color: '#1d4ed8', 
+                      background: '#eff6ff',
+                      padding: '6px 8px',
+                      borderRadius: '8px',
+                      border: '1px solid #bfdbfe',
+                      cursor: 'pointer',
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between',
+                      gap: '4px',
+                      fontWeight: 700
+                    }}
+                    title="Click to open Google Maps navigation"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, overflow: 'hidden' }}>
+                      <MapPin size={14} color="#2563eb" />
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {ord.customerAddress}
+                      </span>
+                    </div>
+
+                    <span style={{ background: '#2563eb', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+                      <Navigation size={10} />
+                      <span>{lang === 'en' ? 'Maps Nav' : '🗺️ रस्ता पाहा'}</span>
+                    </span>
                   </div>
                 )}
 
@@ -708,6 +750,27 @@ export default function OwnerAdmin({
                     >
                       <MessageSquare size={10} /> WhatsApp
                     </a>
+
+                    {ord.customerAddress && (
+                      <button
+                        onClick={() => handleOpenGoogleMapNav(ord.customerAddress)}
+                        style={{
+                          background: '#0284c7',
+                          color: 'white',
+                          border: 'none',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          fontSize: '0.68rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px'
+                        }}
+                      >
+                        <Map size={10} /> {lang === 'en' ? 'Google Maps' : 'गूगल मॅप'}
+                      </button>
+                    )}
                   </div>
 
                   <div style={{ display: 'flex', gap: '4px' }}>

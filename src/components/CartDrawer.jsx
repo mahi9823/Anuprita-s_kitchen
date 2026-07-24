@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Trash2, Plus, Minus, Send, ShoppingBag, CheckCircle, AlertCircle, Sparkles, MapPin, User, Phone } from 'lucide-react';
+import { X, Trash2, Plus, Minus, Send, ShoppingBag, CheckCircle, AlertCircle, Sparkles, MapPin, User, Phone, Navigation } from 'lucide-react';
 
 export default function CartDrawer({
   cartItems,
@@ -15,7 +15,38 @@ export default function CartDrawer({
   const [custName, setCustName] = useState(currentUser?.name || '');
   const [custPhone, setCustPhone] = useState(currentUser?.phone || '');
   const [custAddress, setCustAddress] = useState(currentUser?.address || '');
+  const [isLocating, setIsLocating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Auto-detect current GPS location
+  const handleDetectGPSLocation = () => {
+    if (!navigator.geolocation) {
+      alert(lang === 'en' ? 'Geolocation is not supported by your browser.' : 'तुमच्या ब्राऊजरमध्ये GPS सपोर्ट उपलब्ध नाही.');
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const mapsLink = `https://maps.google.com/?q=${lat},${lng}`;
+        
+        setCustAddress((prev) => {
+          const currentText = prev ? prev + ' ' : '';
+          return `${currentText}[📍 GPS लोकेशन: https://maps.google.com/?q=${lat},${lng}]`;
+        });
+
+        setIsLocating(false);
+        alert(lang === 'en' ? 'Exact GPS Location attached successfully!' : 'तुमचे अचूक GPS लोकेशन जोडले गेले आहे!');
+      },
+      (error) => {
+        setIsLocating(false);
+        alert(lang === 'en' ? 'Unable to retrieve location. Please type manually.' : 'लोकेशन मिळवता आले नाही. कृपया पत्ता हाताने टाईप करा.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   // Compute cart items array with custom extra add-ons
   const cartList = Object.entries(cartItems).map(([itemId, cartVal]) => {
@@ -76,7 +107,7 @@ export default function CartDrawer({
     let waMessage = `*🚩 नवीन जेवण / थाळी ऑर्डर (${orderId})*\n\n`;
     waMessage += `*ग्राहक नाव:* ${custName}\n`;
     waMessage += `*फोन नंबर:* ${custPhone}\n`;
-    waMessage += `*डिलिव्हरी पत्ता:* ${custAddress}\n\n`;
+    waMessage += `*डिलिव्हरी पत्ता व मॅप:* ${custAddress}\n\n`;
     waMessage += `*ऑर्डर केलेले पदार्थ:*\n`;
 
     cartList.forEach((c, idx) => {
@@ -219,11 +250,39 @@ export default function CartDrawer({
                 </div>
 
                 <div className="form-group">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#44403c' }}>
+                      {lang === 'en' ? 'Delivery Address *' : 'संपूर्ण पत्ता *'}
+                    </label>
+
+                    {/* Auto GPS Detect Button */}
+                    <button
+                      type="button"
+                      onClick={handleDetectGPSLocation}
+                      style={{
+                        background: '#eff6ff',
+                        color: '#2563eb',
+                        border: '1px solid #bfdbfe',
+                        borderRadius: '10px',
+                        padding: '3px 8px',
+                        fontSize: '0.68rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '3px'
+                      }}
+                    >
+                      <Navigation size={11} className={isLocating ? 'spin-icon' : ''} />
+                      <span>{isLocating ? (lang === 'en' ? 'Locating...' : 'शोधत आहे...') : (lang === 'en' ? '📍 Add GPS Location' : '📍 माझे GPS लोकेशन जोडा')}</span>
+                    </button>
+                  </div>
+
                   <textarea 
                     rows={2} 
                     required 
                     className="form-textarea" 
-                    placeholder={lang === 'en' ? 'Complete Delivery Address *' : 'संपूर्ण डिलिव्हरी पत्ता व लँडमार्क *'}
+                    placeholder={lang === 'en' ? 'Complete Delivery Address & Landmark *' : 'घर नंबर, सोसायटी नाव, एरिया व लँडमार्क *'}
                     value={custAddress}
                     onChange={(e) => setCustAddress(e.target.value)}
                   />
