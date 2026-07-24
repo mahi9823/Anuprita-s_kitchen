@@ -11,27 +11,48 @@ export default function DishDetailModal({
 }) {
   if (!item) return null;
 
-  const [selectedAddOns, setSelectedAddOns] = useState({});
+  // Track quantity per add-on (e.g. { 'add-bhakri': 2, 'add-chapati': 1 })
+  const [addonQuantities, setAddonQuantities] = useState({});
 
   // 2-Day Advance Cutoff Logic calculation
   const publishedDate = item.publishedAt ? new Date(item.publishedAt).getTime() : Date.now();
   const daysDiff = (Date.now() - publishedDate) / (1000 * 60 * 60 * 24);
   const isOrderClosed = item.advanceNoticeDays ? (daysDiff > item.advanceNoticeDays) : false;
 
-  const handleToggleAddOn = (addon) => {
-    setSelectedAddOns((prev) => {
+  const handleUpdateAddonQty = (addonId, delta) => {
+    setAddonQuantities((prev) => {
+      const currentQty = prev[addonId] || 0;
+      const newQty = Math.max(0, currentQty + delta);
       const updated = { ...prev };
-      if (updated[addon.id]) {
-        delete updated[addon.id];
+      if (newQty === 0) {
+        delete updated[addonId];
       } else {
-        updated[addon.id] = addon;
+        updated[addonId] = newQty;
       }
       return updated;
     });
   };
 
-  const addOnsTotal = Object.values(selectedAddOns).reduce((sum, addon) => sum + addon.price, 0);
+  // Compute extra add-ons total
+  const addOnsTotal = item.extraAddOns 
+    ? item.extraAddOns.reduce((sum, addon) => sum + (addon.price * (addonQuantities[addon.id] || 0)), 0)
+    : 0;
+
   const itemUnitPrice = item.price + addOnsTotal;
+
+  // Selected add-ons list to pass to cart
+  const selectedAddonsList = item.extraAddOns 
+    ? item.extraAddOns
+        .filter(addon => (addonQuantities[addon.id] || 0) > 0)
+        .map(addon => ({
+          ...addon,
+          qty: addonQuantities[addon.id]
+        }))
+    : [];
+
+  const handleAddToCartWithAddons = () => {
+    onUpdateCart(item.id, Math.max(cartQty, 1), selectedAddonsList);
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -93,52 +114,72 @@ export default function DishDetailModal({
             {lang === 'mr' ? item.descriptionMr : item.descriptionEn}
           </p>
 
-          {/* EXTRA ADD-ONS CUSTOMIZER SECTION */}
+          {/* EXTRA ADD-ONS QUANTITY STEPPER CUSTOMIZER SECTION */}
           {item.extraAddOns && item.extraAddOns.length > 0 && (
             <div style={{ background: '#fff7ed', border: '1.5px solid #fed7aa', borderRadius: '14px', padding: '14px' }}>
               <h4 style={{ fontSize: '0.88rem', fontWeight: 800, color: '#9a3412', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <PlusCircle size={16} color="#ea580c" />
-                <span>{lang === 'mr' ? '➕ अतिरिक्त घटक जोडा (Extra Custom Add-ons):' : '➕ Select Extra Custom Add-ons:'}</span>
+                <span>{lang === 'mr' ? '➕ अतिरिक्त भाकरी, चपाती व सोलकढी जोडा (Extra Add-ons):' : '➕ Select Extra Bhakri, Chapati & Solkadhi:'}</span>
               </h4>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {item.extraAddOns.map((addon) => {
-                  const isChecked = !!selectedAddOns[addon.id];
+                  const qty = addonQuantities[addon.id] || 0;
                   return (
-                    <label 
+                    <div 
                       key={addon.id} 
-                      onClick={() => handleToggleAddOn(addon)}
                       style={{
                         display: 'flex',
                         justify: 'space-between',
                         alignItems: 'center',
-                        background: isChecked ? '#ffedd5' : 'white',
-                        border: isChecked ? '1.5px solid #ea580c' : '1px solid #e7e5e4',
+                        background: qty > 0 ? '#ffedd5' : 'white',
+                        border: qty > 0 ? '1.5px solid #ea580c' : '1px solid #e7e5e4',
                         padding: '8px 10px',
                         borderRadius: '10px',
-                        cursor: 'pointer',
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <input 
-                          type="checkbox" 
-                          checked={isChecked} 
-                          onChange={() => {}} 
-                          style={{ width: '16px', height: '16px', accentColor: '#ea580c' }} 
-                        />
-                        <span style={{ fontSize: '0.82rem', fontWeight: isChecked ? 800 : 600, color: '#292524' }}>
+                      <div>
+                        <span style={{ fontSize: '0.85rem', fontWeight: qty > 0 ? 800 : 600, color: '#292524', display: 'block' }}>
                           {lang === 'mr' ? addon.nameMr : addon.nameEn}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ea580c' }}>
+                          ₹{addon.price} {lang === 'mr' ? 'प्रति नग' : 'each'}
                         </span>
                       </div>
 
-                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ea580c' }}>
-                        +₹{addon.price}
-                      </span>
-                    </label>
+                      {/* ADDON QUANTITY STEPPER */}
+                      <div className="stepper" style={{ padding: '2px 6px' }}>
+                        <button 
+                          className="stepper-btn" 
+                          onClick={() => handleUpdateAddonQty(addon.id, -1)}
+                          style={{ background: qty > 0 ? '#ea580c' : '#a8a29e', width: '24px', height: '24px' }}
+                        >
+                          <Minus size={12} />
+                        </button>
+
+                        <span className="stepper-val" style={{ fontSize: '0.85rem', fontWeight: 800, padding: '0 8px', minWidth: '20px', textAlign: 'center' }}>
+                          {qty}
+                        </span>
+
+                        <button 
+                          className="stepper-btn" 
+                          onClick={() => handleUpdateAddonQty(addon.id, 1)}
+                          style={{ background: '#ea580c', width: '24px', height: '24px' }}
+                        >
+                          <Plus size={12} />
+                        </button>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
+
+              {addOnsTotal > 0 && (
+                <div style={{ marginTop: '10px', fontSize: '0.8rem', fontWeight: 800, color: '#9a3412', textAlign: 'right' }}>
+                  {lang === 'mr' ? `एकूण अतिरिक्त आकार: +₹${addOnsTotal}` : `Total Extra Addons: +₹${addOnsTotal}`}
+                </div>
+              )}
             </div>
           )}
 
@@ -237,7 +278,11 @@ export default function DishDetailModal({
                 <span>{lang === 'mr' ? 'ऑर्डर बंद' : 'Order Closed'}</span>
               </button>
             ) : cartQty === 0 ? (
-              <button className="add-btn" onClick={() => onUpdateCart(item.id, 1)} style={{ background: '#16a34a' }}>
+              <button 
+                className="add-btn" 
+                onClick={handleAddToCartWithAddons}
+                style={{ background: '#16a34a' }}
+              >
                 <Plus size={16} />
                 <span>{lang === 'mr' ? 'बास्केटमध्ये जोडा' : 'Add to Basket'}</span>
               </button>

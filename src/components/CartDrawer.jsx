@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingBag, ArrowRight, Trash2, CheckCircle2, User, Phone, MapPin, Send } from 'lucide-react';
-import VegSymbol from './VegSymbol';
+import { X, Trash2, Plus, Minus, Send, ShoppingBag, CheckCircle, AlertCircle, Sparkles, MapPin, User, Phone } from 'lucide-react';
 
 export default function CartDrawer({
   cartItems,
@@ -13,208 +12,240 @@ export default function CartDrawer({
   onOrderPlaced,
   currentUser
 }) {
-  const [customerName, setCustomerName] = useState(currentUser?.name || '');
-  const [customerPhone, setCustomerPhone] = useState(currentUser?.phone || '');
-  const [deliveryAddress, setDeliveryAddress] = useState(currentUser?.address || '');
-  const [deliveryNote, setDeliveryNote] = useState('');
+  const [custName, setCustName] = useState(currentUser?.name || '');
+  const [custPhone, setCustPhone] = useState(currentUser?.phone || '');
+  const [custAddress, setCustAddress] = useState(currentUser?.address || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const cartList = Object.keys(cartItems).map((id) => {
-    const item = foodItems.find((f) => f.id === id);
+  // Compute cart items array with custom extra add-ons
+  const cartList = Object.entries(cartItems).map(([itemId, cartVal]) => {
+    const item = foodItems.find((f) => f.id === itemId);
+    if (!item) return null;
+
+    const qty = typeof cartVal === 'object' ? cartVal.qty : cartVal;
+    const addons = typeof cartVal === 'object' ? (cartVal.addons || []) : [];
+
+    const addonsTotal = addons.reduce((sum, a) => sum + (a.price * a.qty), 0);
+    const unitPrice = item.price + addonsTotal;
+
     return {
-      ...item,
-      qty: cartItems[id]
+      item,
+      qty,
+      addons,
+      unitPrice,
+      itemTotal: unitPrice * qty
     };
   }).filter(Boolean);
 
-  const subtotal = cartList.reduce((acc, curr) => acc + curr.price * curr.qty, 0);
-  const deliveryFee = subtotal > 0 ? (subtotal >= 500 ? 0 : 30) : 0;
-  const grandTotal = subtotal + deliveryFee;
+  const subtotal = cartList.reduce((acc, curr) => acc + curr.itemTotal, 0);
 
-  const handleSendWhatsAppOrder = (e) => {
+  const handleCheckout = (e) => {
     e.preventDefault();
-    if (!customerName || !customerPhone) {
-      alert(lang === 'en' ? 'Please enter your name and phone number.' : 'कृपया तुमचे नाव व नंबर भरा.');
+    if (!custName || !custPhone || !custAddress) {
+      alert(lang === 'en' ? 'Please fill all customer details.' : 'कृपया नाव, फोन नंबर व पत्ता भरा.');
       return;
     }
 
-    const itemizedText = cartList
-      .map(
-        (item) =>
-          `• ${lang === 'en' ? item.titleEn : item.titleMr} x ${item.qty} = ₹${
-            item.price * item.qty
-          }`
-      )
-      .join('%0A');
+    setIsSubmitting(true);
 
-    const msgEn =
-      `🚩 *NEW ORDER - ANUPRITA'S KITCHEN* 🚩%0A%0A` +
-      `👤 *Customer Name:* ${customerName}%0A` +
-      `📱 *Mobile Number:* ${customerPhone}%0A` +
-      `📍 *Delivery Address:* ${deliveryAddress || 'Home Pickup'}%0A` +
-      (deliveryNote ? `📝 *Special Note:* ${deliveryNote}%0A` : '') +
-      `----------------------------------------%0A` +
-      `🍽️ *ORDERED ITEMS (1 Day Prior Booking):*%0A` +
-      `${itemizedText}%0A` +
-      `----------------------------------------%0A` +
-      `💵 *Subtotal:* ₹${subtotal}%0A` +
-      `🚚 *Delivery Fee:* ₹${deliveryFee === 0 ? 'FREE' : deliveryFee}%0A` +
-      `💰 *GRAND TOTAL AMOUNT:* ₹${grandTotal}%0A%0A` +
-      `Hello *Reva Hosing*! Please confirm my order. Thank you! 🙏`;
+    const orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+
+    const itemsSummary = cartList.map((c) => {
+      const addonText = c.addons.length > 0 
+        ? ` (${c.addons.map(a => `+${a.qty}x ${a.nameMr}`).join(', ')})`
+        : '';
+      return `${c.qty}x ${lang === 'en' ? c.item.titleEn : c.item.titleMr}${addonText}`;
+    }).join(', ');
 
     const orderData = {
-      id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-      customerName,
-      customerPhone,
-      customerAddress: deliveryAddress,
-      itemsSummary: cartList.map(i => (lang === 'en' ? i.titleEn : i.titleMr) + ' x' + i.qty).join(', '),
-      total: grandTotal,
+      id: orderId,
+      customerName: custName,
+      customerPhone: custPhone,
+      customerAddress: custAddress,
+      itemsSummary,
+      total: subtotal,
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
       status: 'Pending'
     };
 
+    // Save order history locally
     onOrderPlaced(orderData);
 
-    const targetPhone = whatsappNumber.replace(/\D/g, '');
-    window.open(`https://wa.me/91${targetPhone}?text=${msgEn}`, '_blank');
+    // Format WhatsApp order message sent to Reva Hosing (9403276767)
+    let waMessage = `*🚩 नवीन जेवण / थाळी ऑर्डर (${orderId})*\n\n`;
+    waMessage += `*ग्राहक नाव:* ${custName}\n`;
+    waMessage += `*फोन नंबर:* ${custPhone}\n`;
+    waMessage += `*डिलिव्हरी पत्ता:* ${custAddress}\n\n`;
+    waMessage += `*ऑर्डर केलेले पदार्थ:*\n`;
+
+    cartList.forEach((c, idx) => {
+      waMessage += `${idx + 1}. *${c.item.titleMr}* x ${c.qty} = ₹${c.itemTotal}\n`;
+      if (c.addons.length > 0) {
+        c.addons.forEach((a) => {
+          waMessage += `   └─ ➕ *${a.nameMr}* (${a.qty} नग) = +₹${a.price * a.qty}\n`;
+        });
+      }
+    });
+
+    waMessage += `\n*एकूण बिल रक्कम:* ₹${subtotal}\n`;
+    waMessage += `*ऑर्डर वेळ:* १ दिवस आधी बुक केली.\n\n`;
+    waMessage += `_अनुप्रिताज किचन मोबाईल ॲपवरून पाठवले._`;
+
+    const encodedMsg = encodeURIComponent(waMessage);
+    const waUrl = `https://wa.me/91${whatsappNumber}?text=${encodedMsg}`;
+
+    window.open(waUrl, '_blank');
+    setIsSubmitting(false);
     onClose();
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
+      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="modal-header" style={{ padding: '16px 20px', background: '#fff7ed', borderBottom: '1px solid #fed7aa' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ShoppingBag size={20} color="#ea580c" />
-            <h3 className="modal-title">
-              {lang === 'en' ? 'Your Food Basket' : 'तुमची ऑर्डर बास्केट'}
+            <h3 className="modal-title" style={{ color: '#9a3412' }}>
+              {lang === 'en' ? 'Your Food Basket' : 'तुमची जेवणाची बास्केट'}
             </h3>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {cartList.length > 0 && (
-              <button
-                onClick={onClearCart}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#dc2626',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                {lang === 'en' ? 'Clear' : 'खाली करा'}
-              </button>
-            )}
-            <button className="close-btn" onClick={onClose}>✕</button>
-          </div>
+          <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
-        {cartList.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '30px 10px', color: '#78716c' }}>
-            <ShoppingBag size={48} style={{ opacity: 0.3, marginBottom: '10px' }} />
-            <p style={{ fontWeight: 700, fontSize: '0.95rem' }}>
-              {lang === 'en' ? 'Your basket is currently empty.' : 'तुमची बास्केट रिकामी आहे.'}
-            </p>
-            <p style={{ fontSize: '0.78rem', marginTop: '4px' }}>
-              {lang === 'en' ? 'Select delicious veg items to order.' : 'स्वादिष्ट शाकाहारी पदार्थ निवडा.'}
-            </p>
-          </div>
-        ) : (
-          <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '180px', overflowY: 'auto' }}>
-              {cartList.map((item) => (
-                <div key={item.id} className="cart-item-row">
-                  <img src={item.image} alt={item.titleMr} className="cart-item-img" />
-                  <div className="cart-item-details">
-                    <h4 className="cart-item-name">
-                      {lang === 'en' ? item.titleEn : item.titleMr}
-                    </h4>
-                    <div className="cart-item-price">
-                      ₹{item.price} x {item.qty} = <strong style={{ color: '#ea580c' }}>₹{item.price * item.qty}</strong>
+        <div style={{ padding: '20px', maxHeight: '75vh', overflowY: 'auto' }}>
+          {cartList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '30px 10px', color: '#78716c' }}>
+              <AlertCircle size={40} style={{ opacity: 0.3, marginBottom: '8px' }} />
+              <p style={{ fontWeight: 700 }}>
+                {lang === 'en' ? 'Your basket is empty.' : 'तुमच्या बास्केटमध्ये कोणताही पदार्थ नाही.'}
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Selected Cart Items List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {cartList.map(({ item, qty, addons, unitPrice, itemTotal }) => (
+                  <div 
+                    key={item.id}
+                    style={{
+                      display: 'flex',
+                      gap: '10px',
+                      alignItems: 'center',
+                      background: '#fcfaf8',
+                      padding: '10px',
+                      borderRadius: '12px',
+                      border: '1px solid #e7e5e4'
+                    }}
+                  >
+                    <img 
+                      src={item.image} 
+                      alt={item.titleMr}
+                      style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover' }}
+                      onError={(e) => { e.target.src = '/app_icon.png'; }}
+                    />
+
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1c1917' }}>
+                        {lang === 'en' ? item.titleEn : item.titleMr}
+                      </h4>
+
+                      {/* Render custom extra add-ons */}
+                      {addons.length > 0 && (
+                        <div style={{ marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                          {addons.map((a, i) => (
+                            <span key={i} style={{ fontSize: '0.7rem', color: '#ea580c', fontWeight: 800 }}>
+                              + {a.qty}x {lang === 'en' ? a.nameEn : a.nameMr} (+₹{a.price * a.qty})
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div style={{ fontSize: '0.78rem', color: '#ea580c', fontWeight: 800, marginTop: '2px' }}>
+                        ₹{itemTotal} <span style={{ fontSize: '0.68rem', color: '#78716c', fontWeight: 500 }}>(₹{unitPrice} x {qty})</span>
+                      </div>
+                    </div>
+
+                    <div className="stepper" style={{ padding: '2px 6px' }}>
+                      <button className="stepper-btn" onClick={() => onUpdateCart(item.id, qty - 1)}>
+                        <Minus size={12} />
+                      </button>
+                      <span className="stepper-val" style={{ fontSize: '0.85rem' }}>{qty}</span>
+                      <button className="stepper-btn" onClick={() => onUpdateCart(item.id, qty + 1)}>
+                        <Plus size={12} />
+                      </button>
                     </div>
                   </div>
+                ))}
+              </div>
 
-                  <div className="stepper" style={{ transform: 'scale(0.9)' }}>
-                    <button
-                      className="stepper-btn"
-                      onClick={() => onUpdateCart(item.id, item.qty - 1)}
-                    >
-                      -
-                    </button>
-                    <span className="stepper-val">{item.qty}</span>
-                    <button
-                      className="stepper-btn"
-                      onClick={() => onUpdateCart(item.id, item.qty + 1)}
-                    >
-                      +
-                    </button>
-                  </div>
+              {/* Subtotal Card */}
+              <div style={{ background: '#ecfdf5', padding: '12px', borderRadius: '12px', border: '1px solid #a7f3d0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 800, color: '#065f46', fontSize: '0.9rem' }}>
+                  {lang === 'en' ? 'Total Bill Amount:' : 'एकूण बिल रक्कम:'}
+                </span>
+                <span style={{ fontWeight: 800, color: '#16a34a', fontSize: '1.3rem' }}>
+                  ₹{subtotal}
+                </span>
+              </div>
+
+              {/* Customer Details Form */}
+              <form onSubmit={handleCheckout} style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '6px' }}>
+                <h4 style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1c1917', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <User size={15} color="#ea580c" />
+                  <span>{lang === 'en' ? 'Delivery Details:' : 'डिलिव्हरीसाठी तुमची माहिती भरा:'}</span>
+                </h4>
+
+                <div className="form-group">
+                  <input 
+                    type="text" 
+                    required 
+                    className="form-input" 
+                    placeholder={lang === 'en' ? 'Full Name *' : 'तुमचे नाव *'}
+                    value={custName}
+                    onChange={(e) => setCustName(e.target.value)}
+                  />
                 </div>
-              ))}
+
+                <div className="form-group">
+                  <input 
+                    type="tel" 
+                    required 
+                    className="form-input" 
+                    placeholder={lang === 'en' ? 'WhatsApp Mobile Number *' : 'व्हॉट्सॲप मोबाईल नंबर *'}
+                    value={custPhone}
+                    onChange={(e) => setCustPhone(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <textarea 
+                    rows={2} 
+                    required 
+                    className="form-textarea" 
+                    placeholder={lang === 'en' ? 'Complete Delivery Address *' : 'संपूर्ण डिलिव्हरी पत्ता व लँडमार्क *'}
+                    value={custAddress}
+                    onChange={(e) => setCustAddress(e.target.value)}
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="submit-btn" 
+                  style={{ background: '#25D366', marginTop: '6px', fontSize: '0.95rem' }}
+                >
+                  <Send size={18} />
+                  <span>
+                    {isSubmitting 
+                      ? (lang === 'en' ? 'Sending...' : 'पाठवत आहे...') 
+                      : (lang === 'en' ? 'Confirm & Send Order via WhatsApp' : 'ऑर्डर नक्की करा व व्हॉट्सॲपवर पाठवा')}
+                  </span>
+                </button>
+              </form>
             </div>
-
-            {/* Bill Summary */}
-            <div style={{ background: '#fff7ed', border: '1px solid #ffedd5', borderRadius: '12px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#57534e' }}>
-                <span>{lang === 'en' ? 'Subtotal' : 'पदार्थांची एकूण किंमत'}</span>
-                <span>₹{subtotal}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#57534e' }}>
-                <span>{lang === 'en' ? 'Delivery Fee' : 'डिलिव्हरी शुल्क'}</span>
-                <span>{deliveryFee === 0 ? <span style={{ color: '#16a34a', fontWeight: 800 }}>FREE</span> : '₹' + deliveryFee}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.98rem', fontWeight: 800, color: '#9a3412', borderTop: '1px dashed #fdba74', paddingTop: '4px', marginTop: '2px' }}>
-                <span>{lang === 'en' ? 'Grand Total Amount' : 'एकूण बिल रक्कम'}</span>
-                <span>₹{grandTotal}</span>
-              </div>
-            </div>
-
-            {/* Customer Details Form */}
-            <form onSubmit={handleSendWhatsAppOrder} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div className="form-group">
-                <label className="form-label">{lang === 'en' ? 'Your Full Name *' : 'तुमचे नाव *'}</label>
-                <input
-                  type="text"
-                  required
-                  className="form-input"
-                  placeholder="उदा. राहुल शर्मा"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{lang === 'en' ? 'WhatsApp Mobile Number *' : 'व्हॉट्सॲप नंबर *'}</label>
-                <input
-                  type="tel"
-                  required
-                  className="form-input"
-                  placeholder="9403276767"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{lang === 'en' ? 'Delivery Address' : 'डिलिव्हरीचा पत्ता'}</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="फ्लॅट क्र, सोसायटी, परिसर..."
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                />
-              </div>
-
-              <button type="submit" className="submit-btn" style={{ marginTop: '4px', background: '#25D366' }}>
-                <Send size={16} />
-                <span>{lang === 'en' ? 'Send Order to Reva Hosing via WhatsApp' : 'रेवा होसिंग ताईंना व्हॉट्सॲपवर ऑर्डर पाठवा'}</span>
-              </button>
-            </form>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

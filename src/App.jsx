@@ -19,17 +19,17 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v25 for Extra Add-ons sync
-    const versionKey = 'anuprita_kitchen_v25_extra_addons';
+    // Force reset cache version key to v26 for Stepper Add-ons sync
+    const versionKey = 'anuprita_kitchen_v26_stepper_addons';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v25', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v26', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v25');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v26');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
@@ -43,12 +43,12 @@ export default function App() {
   });
 
   const [cartItems, setCartItems] = useState(() => {
-    const saved = localStorage.getItem('anuprita_kitchen_cart_v25');
+    const saved = localStorage.getItem('anuprita_kitchen_cart_v26');
     return saved ? JSON.parse(saved) : {};
   });
 
   const [ordersList, setOrdersList] = useState(() => {
-    const saved = localStorage.getItem('anuprita_kitchen_orders_v25');
+    const saved = localStorage.getItem('anuprita_kitchen_orders_v26');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -96,7 +96,7 @@ export default function App() {
         }
         setLastCloudSyncTime(new Date().toLocaleTimeString());
       } else {
-        // Seed cloud database with latest menu including extra add-ons!
+        // Seed cloud database with latest menu including stepper add-ons!
         pushStateToCloud(INITIAL_ITEMS, todayMenu);
       }
       setIsSyncingCloud(false);
@@ -157,7 +157,7 @@ export default function App() {
     setItems(itemsToSave);
     setTodayMenu(todayMenuToSave);
 
-    localStorage.setItem('anuprita_kitchen_items_v25', JSON.stringify(itemsToSave));
+    localStorage.setItem('anuprita_kitchen_items_v26', JSON.stringify(itemsToSave));
     localStorage.setItem('anuprita_kitchen_today_menu', JSON.stringify(todayMenuToSave));
 
     // Upload to Cloud Database so all customer devices receive the update immediately!
@@ -167,15 +167,15 @@ export default function App() {
   };
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_items_v25', JSON.stringify(items));
+    localStorage.setItem('anuprita_kitchen_items_v26', JSON.stringify(items));
   }, [items]);
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_cart_v25', JSON.stringify(cartItems));
+    localStorage.setItem('anuprita_kitchen_cart_v26', JSON.stringify(cartItems));
   }, [cartItems]);
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_orders_v25', JSON.stringify(ordersList));
+    localStorage.setItem('anuprita_kitchen_orders_v26', JSON.stringify(ordersList));
   }, [ordersList]);
 
   useEffect(() => {
@@ -200,14 +200,23 @@ export default function App() {
     setIsSyncingCloud(false);
   };
 
-  // Cart quantity update handler
-  const handleUpdateCart = (itemId, qty) => {
+  // Cart quantity update handler supporting custom add-ons
+  const handleUpdateCart = (itemId, qty, addons = null) => {
     setCartItems((prev) => {
       const updated = { ...prev };
       if (qty <= 0) {
         delete updated[itemId];
       } else {
-        updated[itemId] = qty;
+        if (addons !== null) {
+          updated[itemId] = { qty, addons };
+        } else {
+          const currentVal = updated[itemId];
+          if (typeof currentVal === 'object') {
+            updated[itemId] = { ...currentVal, qty };
+          } else {
+            updated[itemId] = qty;
+          }
+        }
       }
       return updated;
     });
@@ -308,7 +317,7 @@ export default function App() {
     return true;
   });
 
-  const cartTotalCount = Object.values(cartItems).reduce((a, b) => a + b, 0);
+  const cartTotalCount = Object.values(cartItems).reduce((a, b) => a + (typeof b === 'object' ? b.qty : b), 0);
 
   return (
     <div className="app-container">
@@ -422,16 +431,20 @@ export default function App() {
                   </button>
                 </div>
               ) : (
-                filteredItems.map((item) => (
-                  <FoodCard
-                    key={item.id}
-                    item={item}
-                    lang={lang}
-                    cartQty={cartItems[item.id] || 0}
-                    onUpdateCart={handleUpdateCart}
-                    onOpenDetails={(selected) => setSelectedDetailItem(selected)}
-                  />
-                ))
+                filteredItems.map((item) => {
+                  const cartVal = cartItems[item.id];
+                  const cartQty = typeof cartVal === 'object' ? cartVal.qty : (cartVal || 0);
+                  return (
+                    <FoodCard
+                      key={item.id}
+                      item={item}
+                      lang={lang}
+                      cartQty={cartQty}
+                      onUpdateCart={handleUpdateCart}
+                      onOpenDetails={(selected) => setSelectedDetailItem(selected)}
+                    />
+                  );
+                })
               )}
             </div>
           )}
@@ -468,7 +481,7 @@ export default function App() {
           item={selectedDetailItem}
           lang={lang}
           onClose={() => setSelectedDetailItem(null)}
-          cartQty={cartItems[selectedDetailItem.id] || 0}
+          cartQty={typeof cartItems[selectedDetailItem.id] === 'object' ? cartItems[selectedDetailItem.id].qty : (cartItems[selectedDetailItem.id] || 0)}
           onUpdateCart={handleUpdateCart}
         />
       )}
