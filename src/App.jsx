@@ -19,36 +19,36 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v21 for Cloud Realtime Sync
-    const versionKey = 'anuprita_kitchen_v21_cloud_realtime_sync';
+    // Force reset cache version key to v22 for Bhajniche Thalipith sync
+    const versionKey = 'anuprita_kitchen_v22_thalipith_added';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v21', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v22', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v21');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v22');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
   const [todayMenu, setTodayMenu] = useState(() => {
     const saved = localStorage.getItem('anuprita_kitchen_today_menu');
     return saved ? JSON.parse(saved) : {
-      breakfast: 'इ़डली सांबार, वाडा पाव व सँडविच (Idli, Wada Pav & Sandwich)',
+      breakfast: 'भाजणीचे थालीपीठ, इ़डली सांबार व वाडा पाव (Thalipith, Idli & Wada Pav)',
       lunch: 'पनीर मसाला + भरली वांगी + वरण भात (Paneer & Brinjal)',
       dinner: 'बेसन पिठलं + शेव भाजी + ज्वारी भाकरी (Pithla & Bhakri)'
     };
   });
 
   const [cartItems, setCartItems] = useState(() => {
-    const saved = localStorage.getItem('anuprita_kitchen_cart_v21');
+    const saved = localStorage.getItem('anuprita_kitchen_cart_v22');
     return saved ? JSON.parse(saved) : {};
   });
 
   const [ordersList, setOrdersList] = useState(() => {
-    const saved = localStorage.getItem('anuprita_kitchen_orders_v21');
+    const saved = localStorage.getItem('anuprita_kitchen_orders_v22');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -96,8 +96,8 @@ export default function App() {
         }
         setLastCloudSyncTime(new Date().toLocaleTimeString());
       } else {
-        // If cloud database is new, seed it with current menu!
-        pushStateToCloud(items, todayMenu);
+        // Seed cloud database with latest menu including Thalipith!
+        pushStateToCloud(INITIAL_ITEMS, todayMenu);
       }
       setIsSyncingCloud(false);
     };
@@ -157,7 +157,7 @@ export default function App() {
     setItems(itemsToSave);
     setTodayMenu(todayMenuToSave);
 
-    localStorage.setItem('anuprita_kitchen_items_v21', JSON.stringify(itemsToSave));
+    localStorage.setItem('anuprita_kitchen_items_v22', JSON.stringify(itemsToSave));
     localStorage.setItem('anuprita_kitchen_today_menu', JSON.stringify(todayMenuToSave));
 
     // Upload to Cloud Database so all customer devices receive the update immediately!
@@ -167,15 +167,15 @@ export default function App() {
   };
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_items_v21', JSON.stringify(items));
+    localStorage.setItem('anuprita_kitchen_items_v22', JSON.stringify(items));
   }, [items]);
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_cart_v21', JSON.stringify(cartItems));
+    localStorage.setItem('anuprita_kitchen_cart_v22', JSON.stringify(cartItems));
   }, [cartItems]);
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_orders_v21', JSON.stringify(ordersList));
+    localStorage.setItem('anuprita_kitchen_orders_v22', JSON.stringify(ordersList));
   }, [ordersList]);
 
   useEffect(() => {

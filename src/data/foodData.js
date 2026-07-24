@@ -52,6 +52,29 @@ export const TIFFIN_PACKAGES = [
 
 export const INITIAL_ITEMS = [
   {
+    id: 'item-bhajniche-thalipith',
+    titleMr: 'खमंग भाजणीचे थालीपीठ (२ नग)',
+    titleEn: 'Authentic Bhajniche Thalipith with Butter (2 pcs)',
+    category: 'snacks',
+    price: 80,
+    unit: 'प्लेट (2 Pcs)',
+    unitEn: 'Plate (2 Pcs)',
+    isVeg: true,
+    isUpvas: false,
+    isBestseller: true,
+    inStock: true,
+    rating: 5.0,
+    reviewsCount: 189,
+    advanceNoticeMr: '१ दिवस आधी ऑर्डर द्या',
+    advanceNoticeEn: 'Order 1 Day in Advance',
+    minOrderQty: 1,
+    image: '/images/thalipith_1784915295277.jpg',
+    descriptionMr: 'घरगुती भाजणीच्या पिठाचे कांदा-तिळाचे खमंग थालीपीठ, ताजे पांढरे लोणी, घट्ट दही व हिरव्या मिरचीचा ठेचा.',
+    descriptionEn: 'Traditional Maharashtrian multigrain bhajni flatbread cooked with onions & sesame, served with white butter, curd & green chili thecha.',
+    ingredientsMr: ['धपाटे/भाजणी पीठ', 'कांदा', 'तीळ', 'ओवा', 'कोथिंबीर', 'पांढरे लोणी', 'दही व ठेचा'],
+    ingredientsEn: ['Multigrain Bhajni Flour', 'Onion', 'Sesame Seeds', 'Ajwain', 'Fresh Coriander', 'White Butter', 'Curd & Thecha']
+  },
+  {
     id: 'item-soft-idli-sambar',
     titleMr: 'मऊ दाक्षिणात्य इडली सांबार (४ नग)',
     titleEn: 'South Indian Soft Idli Sambar (4 pcs)',
