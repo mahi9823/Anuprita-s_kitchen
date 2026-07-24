@@ -19,26 +19,26 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v26 for Stepper Add-ons sync
-    const versionKey = 'anuprita_kitchen_v26_stepper_addons';
+    // Force reset cache version key to v27 for Solkadhi menu addition
+    const versionKey = 'anuprita_kitchen_v27_solkadhi';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v26', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v27', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v26');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v27');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
   const [todayMenu, setTodayMenu] = useState(() => {
     const saved = localStorage.getItem('anuprita_kitchen_today_menu');
     return saved ? JSON.parse(saved) : {
-      breakfast: 'भाजणीचे थालीपीठ, इ़डली सांबार व वाडा पाव (Thalipith & Wada Pav)',
+      breakfast: 'भाजणीचे थालीपीठ, इ़डली सांबार व सोलकढी (Thalipith & Solkadhi)',
       lunch: 'खानदेशी शेव भाजी + बाजरी भाकरी थाळी (Shev Bhaji & Bajra Bhakri)',
-      dinner: 'बेसन पिठलं + शेव भाजी + ज्वारी भाकरी (Pithla & Bhakri)'
+      dinner: 'बेसन पिठलं + शेव भाजी + ताजी सोलकढी (Pithla & Solkadhi)'
     };
   });
 
@@ -157,7 +157,7 @@ export default function App() {
     setItems(itemsToSave);
     setTodayMenu(todayMenuToSave);
 
-    localStorage.setItem('anuprita_kitchen_items_v26', JSON.stringify(itemsToSave));
+    localStorage.setItem('anuprita_kitchen_items_v27', JSON.stringify(itemsToSave));
     localStorage.setItem('anuprita_kitchen_today_menu', JSON.stringify(todayMenuToSave));
 
     // Upload to Cloud Database so all customer devices receive the update immediately!
@@ -167,7 +167,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_items_v26', JSON.stringify(items));
+    localStorage.setItem('anuprita_kitchen_items_v27', JSON.stringify(items));
   }, [items]);
 
   useEffect(() => {
