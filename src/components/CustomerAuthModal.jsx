@@ -299,69 +299,93 @@ export default function CustomerAuthModal({ lang, onClose, onLoginSuccess }) {
                 <div style={{
                   background: '#1e1b4b',
                   color: '#fef08a',
-                  fontSize: '1.5rem',
+                  fontSize: '1.6rem',
                   fontWeight: 900,
                   letterSpacing: '8px',
-                  padding: '8px 16px',
-                  borderRadius: '12px',
+                  padding: '8px 18px',
+                  borderRadius: '14px',
                   margin: '10px auto 8px auto',
                   display: 'inline-block',
-                  boxShadow: '0 4px 12px rgba(30, 27, 75, 0.25)',
-                  border: '1px solid #6366f1'
+                  boxShadow: '0 4px 14px rgba(30, 27, 75, 0.3)',
+                  border: '1.5px solid #6366f1'
                 }}>
                   {generatedOtp}
                 </div>
 
-                <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '2px', lineHeight: 1.3 }}>
+                <div style={{ fontSize: '0.74rem', color: '#334155', marginTop: '2px', lineHeight: 1.35, fontWeight: 700 }}>
                   {lang === 'en' 
-                    ? 'Use the 4-digit code above or tap Auto-Fill below:' 
-                    : 'वरील ४ अंकी कोड टाका किंवा खालील ऑटो-फिल वर क्लिक करा:'}
+                    ? '📱 Send OTP to your phone via Mobile SMS or WhatsApp below:' 
+                    : '📱 तुमच्या मोबाईलवर मेसेजद्वारे OTP मिळवण्यासाठी खालील पर्याय निवडा:'}
                 </div>
 
-                {/* 1-CLICK AUTO-FILL BUTTON */}
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '10px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setOtpCode(generatedOtp)}
-                    style={{
-                      background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                      color: 'white',
-                      border: 'none',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)'
-                    }}
-                  >
-                    <Sparkles size={12} />
-                    <span>{lang === 'en' ? '✨ 1-Click Auto Fill' : '✨ ऑटो-फिल करा'}</span>
-                  </button>
-
+                {/* MOBILE DISPATCH OPTIONS (SMS APP, WHATSAPP, & AUTO-FILL) */}
+                <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginTop: '10px', flexWrap: 'wrap' }}>
+                  {/* REAL MOBILE SMS APP LAUNCHER */}
                   <a
-                    href={`https://api.whatsapp.com/send?phone=91${mobile}&text=${encodeURIComponent(`Anuprita's Kitchen Verification OTP: ${generatedOtp}`)}`}
-                    target="_blank"
-                    rel="noreferrer"
+                    href={`sms:+91${mobile}?body=${encodeURIComponent(`Anuprita's Kitchen Verification OTP: ${generatedOtp}`)}`}
                     style={{
-                      background: '#16a34a',
+                      background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
                       color: 'white',
                       textDecoration: 'none',
-                      padding: '6px 10px',
+                      padding: '7px 11px',
                       borderRadius: '8px',
                       fontSize: '0.72rem',
                       fontWeight: 800,
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '4px'
+                      gap: '4px',
+                      boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
                     }}
                   >
-                    <MessageSquare size={12} />
-                    <span>WhatsApp OTP</span>
+                    <MessageSquare size={13} />
+                    <span>{lang === 'en' ? '📱 SMS App OTP' : '📱 SMS मेसेज द्वारे OTP'}</span>
                   </a>
+
+                  {/* WHATSAPP OTP LAUNCHER */}
+                  <a
+                    href={`https://api.whatsapp.com/send?phone=91${mobile}&text=${encodeURIComponent(`Anuprita's Kitchen Verification OTP: ${generatedOtp}`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+                      color: 'white',
+                      textDecoration: 'none',
+                      padding: '7px 11px',
+                      borderRadius: '8px',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      boxShadow: '0 2px 6px rgba(22, 163, 74, 0.3)'
+                    }}
+                  >
+                    <Phone size={13} />
+                    <span>{lang === 'en' ? '💬 WhatsApp OTP' : '💬 WhatsApp OTP'}</span>
+                  </a>
+
+                  {/* 1-CLICK AUTO FILL */}
+                  <button
+                    type="button"
+                    onClick={() => setOtpCode(generatedOtp)}
+                    style={{
+                      background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '7px 11px',
+                      borderRadius: '8px',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      boxShadow: '0 2px 6px rgba(234, 88, 12, 0.3)'
+                    }}
+                  >
+                    <Sparkles size={13} />
+                    <span>{lang === 'en' ? '✨ 1-Click Auto Fill' : '✨ ऑटो-फिल करा'}</span>
+                  </button>
                 </div>
               </div>
 
