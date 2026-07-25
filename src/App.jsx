@@ -35,12 +35,21 @@ export default function App() {
   });
 
   const [todayMenu, setTodayMenu] = useState(() => {
-    const saved = localStorage.getItem('anuprita_kitchen_today_menu');
-    return saved ? JSON.parse(saved) : {
-      breakfast: 'भाजणीचे थालीपीठ, इ़डली सांबार व सोलकढी (Thalipith & Solkadhi)',
-      lunch: 'खानदेशी शेव भाजी + बाजरी भाकरी थाळी (Shev Bhaji & Bajra Bhakri)',
-      dinner: 'बेसन पिठलं + शेव भाजी + ताजी सोलकढी (Pithla & Solkadhi)'
+    const todayKey = 'anuprita_today_menu_v34_ekadashi_upvas';
+    const newMenu = {
+      breakfast: 'साबूदाणा खिचडी (Sabudana Khichdi)',
+      lunch: 'एकादशी उपवास स्पेशल थाळी - उपवास टिक्की, साबूदाणा खिचडी, काकडी कोशिंबीर व रताळे कीस',
+      dinner: 'एकादशी उपवास स्पेशल थाळी - उपवास टिक्की, साबूदाणा खिचडी, काकडी कोशिंबीर व रताळे कीस'
     };
+
+    if (!localStorage.getItem(todayKey)) {
+      localStorage.setItem(todayKey, 'true');
+      localStorage.setItem('anuprita_kitchen_today_menu', JSON.stringify(newMenu));
+      pushStateToCloud(INITIAL_ITEMS, newMenu);
+      return newMenu;
+    }
+    const saved = localStorage.getItem('anuprita_kitchen_today_menu');
+    return saved ? JSON.parse(saved) : newMenu;
   });
 
   const [cartItems, setCartItems] = useState(() => {
@@ -117,7 +126,8 @@ export default function App() {
       setIsSyncingCloud(false);
     };
 
-    // Initial fetch on app open
+    // Initial fetch & push latest menu to Cloud
+    pushStateToCloud(INITIAL_ITEMS, todayMenu);
     syncFromCloud();
 
     // Auto-sync every 1 minute (1 * 60 * 1000 = 60000 ms)
