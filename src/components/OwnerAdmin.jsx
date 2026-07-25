@@ -418,75 +418,7 @@ export default function OwnerAdmin({
         </div>
       </div>
 
-      {/* EDIT TODAY'S SPECIAL BREAKFAST, LUNCH & DINNER MENU */}
-      <div className="calc-card" style={{ background: '#fff7ed', border: '1.5px solid #fed7aa', marginBottom: '8px' }}>
-        <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#9a3412', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-          <Utensils size={16} color="#ea580c" />
-          <span>{lang === 'en' ? "Update Today's Special Menu (Live Sync)" : 'आजचा खास नाश्ता व जेवण बदला (रिअल-टाईम सिंक)'}</span>
-        </h3>
 
-        <form onSubmit={handleSaveDailyMenu} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div>
-            <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#44403c', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Sun size={12} color="#ea580c" /> {lang === 'en' ? "Today's Breakfast:" : 'आजचा खास नाश्ता:'}
-            </label>
-            <input 
-              type="text" 
-              className="form-input" 
-              value={breakfastVal} 
-              onChange={(e) => setBreakfastVal(e.target.value)} 
-              placeholder="उदा. भाजणीचे थालीपीठ व वाडा पाव"
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#44403c', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Utensils size={12} color="#16a34a" /> {lang === 'en' ? "Today's Lunch:" : 'आजचे दुपारचे जेवण:'}
-            </label>
-            <input 
-              type="text" 
-              className="form-input" 
-              value={lunchVal} 
-              onChange={(e) => setLunchVal(e.target.value)} 
-              placeholder="उदा. पनीर मसाला + वरण भात"
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#44403c', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Moon size={12} color="#0284c7" /> {lang === 'en' ? "Today's Dinner:" : 'आजचे रात्रीचे जेवण:'}
-            </label>
-            <input 
-              type="text" 
-              className="form-input" 
-              value={dinnerVal} 
-              onChange={(e) => setDinnerVal(e.target.value)} 
-              placeholder="उदा. बेसन पिठलं + ज्वारी भाकरी"
-            />
-          </div>
-
-          <button 
-            type="submit" 
-            style={{ 
-              background: '#ea580c', 
-              color: 'white', 
-              border: 'none', 
-              padding: '6px 12px', 
-              borderRadius: '8px', 
-              fontSize: '0.75rem', 
-              fontWeight: 800, 
-              cursor: 'pointer', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              gap: '4px' 
-            }}
-          >
-            <Save size={13} />
-            <span>{lang === 'en' ? "Save & Broadcast Today's Menu" : 'आजचा मेनू साठवा (सर्व मोबाईलवर सिंक होईल)'}</span>
-          </button>
-        </form>
-      </div>
 
       {/* FINANCIAL MONTH-END SUMMARY CARDS */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
