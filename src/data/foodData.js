@@ -463,6 +463,37 @@ export const INITIAL_ITEMS = [
     ]
   },
   {
+    id: 'item-upvas-4',
+    titleMr: 'उपवास साबूदाणा थालीपीठ (२ नग)',
+    titleEn: 'Upvas Sabudana Thalipith (2 pcs)',
+    category: 'upvas',
+    price: 60,
+    unit: 'प्लेट (2 Pcs)',
+    unitEn: 'Plate (2 Pcs)',
+    isVeg: true,
+    isUpvas: true,
+    isBestseller: true,
+    inStock: true,
+    rating: 5.0,
+    reviewsCount: 136,
+    calories: 380,
+    protein: '6g',
+    carbs: '48g',
+    fat: '15g',
+    advanceNoticeMr: '१ दिवस आधी ऑर्डर द्या (1 Day Prior)',
+    advanceNoticeEn: 'Order 1 Day in Advance',
+    minOrderQty: 1,
+    image: '/images/sabudana_thalipith.jpg',
+    descriptionMr: 'साबुदाणे, उकडलेले बटाटे आणि भाजलेल्या दाण्याचा कूट वापरून तव्यावर खरपूस भाजलेले २ उपवास थालीपीठ, ताजे लोणी व गोड दह्यासोबत.',
+    descriptionEn: 'Authentic Fasting Special Sabudana Thalipith (2 pcs) roasted with tapioca, potatoes & peanuts, served with white butter & curd.',
+    ingredientsMr: ['साबुदाणा', 'उकडलेला बटाटा', 'शेंगदाणा कूट', 'सैंधव मीठ', 'जिरे', 'हिरवी मिरची', 'पांढरे लोणी', 'दही'],
+    ingredientsEn: ['Tapioca Pearls', 'Boiled Potato', 'Crushed Peanuts', 'Sendha Salt', 'Cumin', 'Green Chili', 'White Butter', 'Curd'],
+    extraAddOns: [
+      { id: 'add-curd-upvas', nameMr: 'अतिरिक्त उपवास दही वाटी', nameEn: 'Extra Sweet Curd Bowl', price: 20 },
+      { id: 'add-butter-upvas', nameMr: 'अतिरिक्त ताजे पांढरे लोणी', nameEn: 'Extra White Butter Scoop', price: 20 }
+    ]
+  },
+  {
     id: 'item-7',
     titleMr: 'केशरी बासुंदी / गुलाबजामुन (५०० ग्रॅम)',
     titleEn: 'Keshari Basundi / Gulab Jamun (500g)',
