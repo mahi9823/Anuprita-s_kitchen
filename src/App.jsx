@@ -20,17 +20,17 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v30 for Puran Poli Thali exact message update
-    const versionKey = 'anuprita_kitchen_v30_puranpoli_exact_msg';
+    // Force reset cache version key to v31 for Sabudana Vada 2 pcs 60 Rs & Fasting Only filter
+    const versionKey = 'anuprita_kitchen_v31_upvas_vada_fasting_only';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v30', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v31', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v30');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v31');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
@@ -231,7 +231,7 @@ export default function App() {
     setItems(itemsToSave);
     setTodayMenu(todayMenuToSave);
 
-    localStorage.setItem('anuprita_kitchen_items_v30', JSON.stringify(itemsToSave));
+    localStorage.setItem('anuprita_kitchen_items_v31', JSON.stringify(itemsToSave));
     localStorage.setItem('anuprita_kitchen_today_menu', JSON.stringify(todayMenuToSave));
 
     // Upload to Cloud Database so all customer devices receive the update immediately!
@@ -241,7 +241,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_items_v30', JSON.stringify(items));
+    localStorage.setItem('anuprita_kitchen_items_v31', JSON.stringify(items));
   }, [items]);
 
   useEffect(() => {
@@ -374,12 +374,18 @@ export default function App() {
       if (!matchTitleMr && !matchTitleEn && !matchDesc) return false;
     }
 
+    // Upvas items should appear ONLY in the Fasting Only category (or when upvas filter tag is selected)
+    const isUpvasItem = item.category === 'upvas' || item.isUpvas === true;
+    if (isUpvasItem && selectedCat !== 'upvas' && vegFilter !== 'upvas' && !searchQuery) {
+      return false;
+    }
+
     // Category filter
     if (selectedCat !== 'all') {
       if (selectedCat === 'bulk') {
         if (!item.isBestseller) return false;
       } else if (selectedCat === 'upvas') {
-        if (item.category !== 'upvas' && !item.isUpvas) return false;
+        if (!isUpvasItem) return false;
       } else if (item.category !== selectedCat) {
         return false;
       }
