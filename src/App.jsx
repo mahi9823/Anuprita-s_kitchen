@@ -583,12 +583,18 @@ export default function App() {
         </main>
       )}
 
-      {/* App Developer Branding Footer */}
-      <footer style={{ textAlign: 'center', padding: '16px 10px 10px 10px', color: '#78716c', fontSize: '0.72rem', fontWeight: 600 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#f5f5f4', padding: '4px 12px', borderRadius: '14px', border: '1px solid #e7e5e4' }}>
-          <Code size={12} color="#ea580c" />
+      {/* App Owner & Developer Branding Footer */}
+      <footer style={{ textAlign: 'center', padding: '16px 10px 12px 10px', color: '#78716c', fontSize: '0.72rem', fontWeight: 600, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#fff7ed', padding: '4px 14px', borderRadius: '14px', border: '1px solid #fed7aa', boxShadow: '0 2px 6px rgba(234, 88, 12, 0.1)' }}>
+          <Sparkles size={12} color="#ea580c" />
+          <span>{lang === 'en' ? 'Kitchen Owner: ' : 'मालक: '}</span>
+          <strong style={{ color: '#c2410c', fontWeight: 800 }}>Reva Hosing (रेवा होसिंग)</strong>
+        </div>
+
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#f5f5f4', padding: '4px 14px', borderRadius: '14px', border: '1px solid #e7e5e4' }}>
+          <Code size={12} color="#475569" />
           <span>{lang === 'en' ? 'App Developer: ' : 'ॲप डेव्हलपर: '}</span>
-          <strong style={{ color: '#ea580c', fontWeight: 800 }}>Mahesh Hosing</strong>
+          <strong style={{ color: '#1e293b', fontWeight: 800 }}>Mahesh Hosing</strong>
         </div>
       </footer>
 
