@@ -177,7 +177,7 @@ export default function OwnerAdmin({
     const newOrder = {
       id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
       customerName: custName,
-      customerPhone: custPhone || '9403276767',
+      customerPhone: custPhone || '7507969291',
       customerAddress: custAddress || 'घरगुती डिलिव्हरी',
       itemsSummary: orderDetails || 'घरगुती जेवण ऑर्डर',
       total: parseFloat(orderAmount),

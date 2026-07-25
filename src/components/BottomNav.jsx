@@ -1,14 +1,15 @@
 import React from 'react';
 import { Utensils, Calculator, ShoppingBag, MessageSquare } from 'lucide-react';
 
-export default function BottomNav({ activeTab, setActiveTab, cartCount, lang, isOwnerMode }) {
+export default function BottomNav({ activeTab, setActiveTab, cartCount, lang, isOwnerMode, whatsappNumber = '7507969291' }) {
   const handleChatWithOwner = () => {
     const text = encodeURIComponent(
       lang === 'en' 
         ? "Hello Anuprita's Kitchen! I would like to inquire about a custom veg dish that is not listed in the menu." 
         : "नमस्कार अनुप्रिताज किचन! मला मेनूमध्ये नसलेल्या दुसऱ्या खास शाकाहारी पदार्थाबाबत चौकशी करायची आहे."
     );
-    window.open(`https://wa.me/919403276767?text=${text}`, '_blank');
+    const targetPhone = (whatsappNumber || '7507969291').replace(/\D/g, '');
+    window.open(`https://wa.me/91${targetPhone}?text=${text}`, '_blank');
   };
 
   return (

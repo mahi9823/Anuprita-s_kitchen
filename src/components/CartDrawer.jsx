@@ -103,7 +103,7 @@ export default function CartDrawer({
     // Save order history locally
     onOrderPlaced(orderData);
 
-    // Format WhatsApp order message sent to Reva Hosing (9403276767)
+    // Format WhatsApp order message sent to Anuprita (7507969291)
     let waMessage = `*🚩 नवीन जेवण / थाळी ऑर्डर (${orderId})*\n\n`;
     waMessage += `*ग्राहक नाव:* ${custName}\n`;
     waMessage += `*फोन नंबर:* ${custPhone}\n`;

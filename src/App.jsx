@@ -71,7 +71,8 @@ export default function App() {
 
   const [lastCloudSyncTime, setLastCloudSyncTime] = useState(null);
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
-  const [whatsappNumber, setWhatsappNumber] = useState('9403276767');
+  // Default Owner WhatsApp Mobile Number set to 7507969291
+  const [whatsappNumber, setWhatsappNumber] = useState('7507969291');
   const [selectedCat, setSelectedCat] = useState('all');
   const [vegFilter, setVegFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -626,6 +627,7 @@ export default function App() {
         cartCount={cartTotalCount}
         lang={lang}
         isOwnerMode={isOwnerMode}
+        whatsappNumber={whatsappNumber}
       />
     </div>
   );
