@@ -19,17 +19,17 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v27 for Solkadhi menu addition
-    const versionKey = 'anuprita_kitchen_v27_solkadhi';
+    // Force reset cache version key to v28 for removing Shahi Veg Feast Thali
+    const versionKey = 'anuprita_kitchen_v28_remove_shahi';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v27', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v28', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v27');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v28');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
@@ -157,7 +157,7 @@ export default function App() {
     setItems(itemsToSave);
     setTodayMenu(todayMenuToSave);
 
-    localStorage.setItem('anuprita_kitchen_items_v27', JSON.stringify(itemsToSave));
+    localStorage.setItem('anuprita_kitchen_items_v28', JSON.stringify(itemsToSave));
     localStorage.setItem('anuprita_kitchen_today_menu', JSON.stringify(todayMenuToSave));
 
     // Upload to Cloud Database so all customer devices receive the update immediately!
@@ -167,7 +167,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_items_v27', JSON.stringify(items));
+    localStorage.setItem('anuprita_kitchen_items_v28', JSON.stringify(items));
   }, [items]);
 
   useEffect(() => {
