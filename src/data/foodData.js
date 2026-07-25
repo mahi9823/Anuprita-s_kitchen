@@ -522,6 +522,37 @@ export const INITIAL_ITEMS = [
     ]
   },
   {
+    id: 'item-upvas-5',
+    titleMr: 'खमंग भगर व शेंगदाणा आमटी (Upvas Special)',
+    titleEn: 'Bhagar (Varai) & Shengdana Amti',
+    category: 'upvas',
+    price: 100,
+    unit: 'प्लेट (Plate)',
+    unitEn: '1 Meal Plate',
+    isVeg: true,
+    isUpvas: true,
+    isBestseller: true,
+    inStock: true,
+    rating: 5.0,
+    reviewsCount: 174,
+    calories: 410,
+    protein: '9g',
+    carbs: '54g',
+    fat: '14g',
+    advanceNoticeMr: '१ दिवस आधी ऑर्डर द्या (1 Day Prior)',
+    advanceNoticeEn: 'Order 1 Day in Advance',
+    minOrderQty: 1,
+    image: '/images/bhagar_shengdana_amti.jpg',
+    descriptionMr: 'साजूक तुपात फोडणी दिलेली मोकळी-सळसळीत उपवास भगर (वरई भात) आणि खमंग चविष्ट शेंगदाणा कूट आमटी.',
+    descriptionEn: 'Authentic Maharashtrian Fasting meal cooked in pure ghee - soft steamed Bhagar (Varai) paired with rich roasted peanut Shengdana Amti gravy.',
+    ingredientsMr: ['भगर (वरई)', 'शेंगदाणा आमटी', 'साजूक तूप', 'जिरे', 'हिरवी मिरची', 'सैंधव मीठ'],
+    ingredientsEn: ['Bhagar (Barnyard Millet)', 'Peanut Amti Gravy', 'Desi Ghee', 'Cumin', 'Green Chili', 'Sendha Salt'],
+    extraAddOns: [
+      { id: 'add-amti-upvas', nameMr: 'अतिरिक्त शेंगदाणा आमटी वाटी', nameEn: 'Extra Shengdana Amti Bowl', price: 30 },
+      { id: 'add-curd-upvas', nameMr: 'अतिरिक्त उपवास दही वाटी', nameEn: 'Extra Sweet Curd Bowl', price: 20 }
+    ]
+  },
+  {
     id: 'item-7',
     titleMr: 'केशरी बासुंदी / गुलाबजामुन (५०० ग्रॅम)',
     titleEn: 'Keshari Basundi / Gulab Jamun (500g)',
