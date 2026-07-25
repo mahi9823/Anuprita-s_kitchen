@@ -87,27 +87,30 @@ export default function Header({
             )
           )}
 
-          {/* CUSTOMER LOGIN / PROFILE BUTTON */}
+          {/* CUSTOMER LOGIN / PROFILE AVATAR BUTTON */}
           {!isOwnerMode && (
             currentUser ? (
               <button
                 onClick={onOpenProfile}
+                title={lang === 'en' ? `Customer Account: ${currentUser.name}` : `ग्राहक खाते: ${currentUser.name}`}
                 style={{
-                  background: '#fef3c7',
-                  border: '1px solid #fcd34d',
-                  color: '#92400e',
-                  padding: '5px 9px',
-                  borderRadius: '20px',
-                  fontSize: '0.7rem',
-                  fontWeight: 800,
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                  border: '1.5px solid #f59e0b',
+                  color: '#78350f',
+                  fontSize: '0.9rem',
+                  fontWeight: 900,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 6px rgba(245, 158, 11, 0.35)',
+                  flexShrink: 0
                 }}
               >
-                <User size={12} />
-                <span>{currentUser.name.split(' ')[0]} 👋</span>
+                {currentUser.name ? currentUser.name.trim().charAt(0).toUpperCase() : 'U'}
               </button>
             ) : (
               <button
