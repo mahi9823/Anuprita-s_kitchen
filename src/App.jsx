@@ -106,9 +106,9 @@ export default function App() {
     // Initial fetch on app open
     syncFromCloud();
 
-    // Auto-sync every 5 minutes (5 * 60 * 1000 = 300000 ms)
-    const FIVE_MINUTES = 5 * 60 * 1000;
-    const intervalId = setInterval(syncFromCloud, FIVE_MINUTES);
+    // Auto-sync every 1 minute (1 * 60 * 1000 = 60000 ms)
+    const ONE_MINUTE = 1 * 60 * 1000;
+    const intervalId = setInterval(syncFromCloud, ONE_MINUTE);
 
     // Instant auto-sync whenever customer re-opens or focuses the app tab
     const handleFocus = () => {
@@ -469,7 +469,7 @@ export default function App() {
                 title="Cloud Realtime Sync Active"
               >
                 <RefreshCw size={10} className={isSyncingCloud ? 'spin-icon' : ''} />
-                <span>{isSyncingCloud ? (lang === 'en' ? 'Syncing...' : 'सिंक होत आहे...') : (lang === 'en' ? '☁️ Auto-Sync (5m)' : '☁️ ५ मि. ऑटो-सिंक')}</span>
+                <span>{isSyncingCloud ? (lang === 'en' ? 'Syncing...' : 'सिंक होत आहे...') : (lang === 'en' ? '☁️ Auto-Sync (1m)' : '☁️ १ मि. ऑटो-सिंक')}</span>
               </button>
             </div>
             <h2 className="welcome-title">
