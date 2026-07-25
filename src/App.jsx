@@ -85,7 +85,7 @@ export default function App() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showOwnerPinModal, setShowOwnerPinModal] = useState(false);
 
-  // AUTOMATIC REALTIME CLOUD SYNC: Pull latest owner edits from Cloud database every 10 seconds!
+  // AUTOMATIC CLOUD SYNC: Auto-pull latest menu & prices from Cloud database every 5 minutes (300,000 ms) + on app focus!
   useEffect(() => {
     const syncFromCloud = async () => {
       setIsSyncingCloud(true);
@@ -106,9 +106,20 @@ export default function App() {
     // Initial fetch on app open
     syncFromCloud();
 
-    // Poll every 10 seconds for real-time background sync on all customer phones
-    const intervalId = setInterval(syncFromCloud, 10000);
-    return () => clearInterval(intervalId);
+    // Auto-sync every 5 minutes (5 * 60 * 1000 = 300000 ms)
+    const FIVE_MINUTES = 5 * 60 * 1000;
+    const intervalId = setInterval(syncFromCloud, FIVE_MINUTES);
+
+    // Instant auto-sync whenever customer re-opens or focuses the app tab
+    const handleFocus = () => {
+      syncFromCloud();
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // PWA Install Prompt State & Handlers
@@ -452,7 +463,7 @@ export default function App() {
                 title="Cloud Realtime Sync Active"
               >
                 <RefreshCw size={10} className={isSyncingCloud ? 'spin-icon' : ''} />
-                <span>{isSyncingCloud ? (lang === 'en' ? 'Syncing...' : 'सिंक होत आहे...') : (lang === 'en' ? 'Live Cloud Synced' : '☁️ थेट सिंक')}</span>
+                <span>{isSyncingCloud ? (lang === 'en' ? 'Syncing...' : 'सिंक होत आहे...') : (lang === 'en' ? '☁️ Auto-Sync (5m)' : '☁️ ५ मि. ऑटो-सिंक')}</span>
               </button>
             </div>
             <h2 className="welcome-title">
