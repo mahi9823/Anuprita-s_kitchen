@@ -7,8 +7,8 @@ export default function OwnerPinModal({ lang, onClose, onLoginSuccess }) {
 
   const handleVerifyPin = (e) => {
     e.preventDefault();
-    // Owner PIN Security Check
-    if (pin === '1234' || pin === '9403') {
+    // Owner Security PIN Check (9823)
+    if (pin === '9823' || pin === '7507') {
       onLoginSuccess();
     } else {
       setErrorMsg(lang === 'en' ? 'Incorrect Security PIN!' : 'चुकीचा मालक पिन!');
@@ -21,7 +21,7 @@ export default function OwnerPinModal({ lang, onClose, onLoginSuccess }) {
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Lock size={20} color="#ea580c" />
-            <h3 className="modal-title">{lang === 'en' ? 'Owner Security Login' : 'रेवा होसिंग मालक लॉगिन'}</h3>
+            <h3 className="modal-title">{lang === 'en' ? 'Owner Security Login' : "अनुप्रिताज किचन मालक लॉगिन"}</h3>
           </div>
           <button className="close-btn" onClick={onClose}>
             <X size={18} />
