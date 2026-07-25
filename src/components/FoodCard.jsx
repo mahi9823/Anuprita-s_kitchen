@@ -85,6 +85,14 @@ export default function FoodCard({
                 </span>
               )}
             </div>
+
+            {/* ADVANCE NOTICE CALLOUT BADGE */}
+            {item.advanceNoticeEn && (
+              <div style={{ marginTop: '4px', fontSize: '0.66rem', fontWeight: 800, color: '#9a3412', background: '#fff7ed', border: '1px solid #ffedd5', padding: '2px 7px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <Calendar size={10} color="#ea580c" />
+                <span>{lang === 'mr' ? item.advanceNoticeMr : item.advanceNoticeEn}</span>
+              </div>
+            )}
           </div>
 
           <div className="food-price">

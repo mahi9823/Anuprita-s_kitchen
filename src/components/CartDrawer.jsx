@@ -13,7 +13,7 @@ export default function CartDrawer({
   currentUser
 }) {
   const [custName, setCustName] = useState(currentUser?.name || '');
-  const [custPhone, setCustPhone] = useState(currentUser?.phone || '');
+  const [custPhone, setCustPhone] = useState(currentUser?.mobile || currentUser?.phone || '');
   const [custAddress, setCustAddress] = useState(currentUser?.address || '');
   const [isLocating, setIsLocating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
