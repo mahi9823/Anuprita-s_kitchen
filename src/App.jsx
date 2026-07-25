@@ -588,7 +588,7 @@ export default function App() {
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#fff7ed', padding: '4px 14px', borderRadius: '14px', border: '1px solid #fed7aa', boxShadow: '0 2px 6px rgba(234, 88, 12, 0.1)' }}>
           <Sparkles size={12} color="#ea580c" />
           <span>{lang === 'en' ? 'Kitchen Owner: ' : 'मालक: '}</span>
-          <strong style={{ color: '#c2410c', fontWeight: 800 }}>Reva Mahesh Hosing (रेवा महेश होसिंग)</strong>
+          <strong style={{ color: '#c2410c', fontWeight: 800 }}>Reva Mahesh Hosing</strong>
         </div>
 
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#f5f5f4', padding: '4px 14px', borderRadius: '14px', border: '1px solid #e7e5e4' }}>
