@@ -287,38 +287,87 @@ export default function CustomerAuthModal({ lang, onClose, onLoginSuccess }) {
           ) : (
             /* STEP 2: 4-DIGIT OTP VERIFICATION FORM */
             <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ textAlign: 'center', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '14px' }}>
+              <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)', border: '1.5px solid #bfdbfe', borderRadius: '16px', padding: '16px' }}>
                 <div style={{ display: 'inline-flex', background: '#dcfce7', padding: '10px', borderRadius: '50%', color: '#15803d', marginBottom: '8px' }}>
                   <Phone size={24} />
                 </div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b' }}>
-                  {lang === 'en' ? `OTP Sent to +91 ${mobile}` : `+91 ${mobile} वर OTP पाठवला आहे`}
+                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1e293b' }}>
+                  {lang === 'en' ? `OTP Code for +91 ${mobile}:` : `+91 ${mobile} साठी OTP कोड:`}
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-                  {lang === 'en' ? 'Check SMS notification or enter code below:' : 'एसएमएस नोटिफिकेशन तपासा किंवा खालील कोड टाका:'}
+                
+                {/* PROMINENT OTP CODE DISPLAY CARD */}
+                <div style={{
+                  background: '#1e1b4b',
+                  color: '#fef08a',
+                  fontSize: '1.5rem',
+                  fontWeight: 900,
+                  letterSpacing: '8px',
+                  padding: '8px 16px',
+                  borderRadius: '12px',
+                  margin: '10px auto 8px auto',
+                  display: 'inline-block',
+                  boxShadow: '0 4px 12px rgba(30, 27, 75, 0.25)',
+                  border: '1px solid #6366f1'
+                }}>
+                  {generatedOtp}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowSmsToast(true)}
-                  style={{
-                    background: '#e0e7ff',
-                    color: '#3730a3',
-                    border: 'none',
-                    padding: '3px 8px',
-                    borderRadius: '6px',
-                    fontSize: '0.68rem',
-                    fontWeight: 800,
-                    marginTop: '6px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  💬 {lang === 'en' ? 'Show SMS OTP Toast Again' : 'पुन्हा SMS OTP पहा'}
-                </button>
+
+                <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '2px', lineHeight: 1.3 }}>
+                  {lang === 'en' 
+                    ? 'Use the 4-digit code above or tap Auto-Fill below:' 
+                    : 'वरील ४ अंकी कोड टाका किंवा खालील ऑटो-फिल वर क्लिक करा:'}
+                </div>
+
+                {/* 1-CLICK AUTO-FILL BUTTON */}
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setOtpCode(generatedOtp)}
+                    style={{
+                      background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)'
+                    }}
+                  >
+                    <Sparkles size={12} />
+                    <span>{lang === 'en' ? '✨ 1-Click Auto Fill' : '✨ ऑटो-फिल करा'}</span>
+                  </button>
+
+                  <a
+                    href={`https://api.whatsapp.com/send?phone=91${mobile}&text=${encodeURIComponent(`Anuprita's Kitchen Verification OTP: ${generatedOtp}`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      background: '#16a34a',
+                      color: 'white',
+                      textDecoration: 'none',
+                      padding: '6px 10px',
+                      borderRadius: '8px',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <MessageSquare size={12} />
+                    <span>WhatsApp OTP</span>
+                  </a>
+                </div>
               </div>
 
               <div className="form-group">
                 <label className="form-label" style={{ textAlign: 'center', display: 'block', fontWeight: 800, color: '#334155' }}>
-                  {lang === 'en' ? 'Enter 4-Digit Verification Code *' : '४-अंकी OTP कोड टाका *'}
+                  {lang === 'en' ? 'Enter 4-Digit Verification Code *' : '४-अंकी OTP कोड प्रविष्ट करा *'}
                 </label>
                 <input
                   type="text"
