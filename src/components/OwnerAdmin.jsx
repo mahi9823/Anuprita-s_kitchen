@@ -197,9 +197,22 @@ export default function OwnerAdmin({
   };
 
   const handleChangeOrderStatus = (orderId, newStatus) => {
-    setLocalOrders((prev) =>
-      prev.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord))
-    );
+    setLocalOrders((prev) => {
+      const updated = prev.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord));
+      localStorage.setItem('anuprita_kitchen_orders_v26', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleDeleteOrder = (orderId) => {
+    if (window.confirm(lang === 'en' ? 'Are you sure you want to delete this order record permanently?' : 'ही ऑर्डर रेकॉर्ड लेजरमधून पूर्णपणे हटवायची आहे का?')) {
+      setLocalOrders((prev) => {
+        const updated = prev.filter((ord) => ord.id !== orderId);
+        localStorage.setItem('anuprita_kitchen_orders_v26', JSON.stringify(updated));
+        return updated;
+      });
+      triggerSyncAlert(lang === 'en' ? 'Order record deleted from financial ledger!' : 'ऑर्डर रेकॉर्ड लेजरमधून हटवला गेला!');
+    }
   };
 
   // Resizes and compresses heavy mobile camera photos cleanly
@@ -771,6 +784,28 @@ export default function OwnerAdmin({
                         <span>{lang === 'en' ? 'Set Pending' : 'बाकी करा'}</span>
                       </button>
                     )}
+
+                    {/* DELETE ORDER RECORD BUTTON */}
+                    <button
+                      onClick={() => handleDeleteOrder(ord.id)}
+                      title={lang === 'en' ? 'Delete Order Record' : 'ऑर्डर रेकॉर्ड लेजरमधून पूर्णपणे हटवा'}
+                      style={{
+                        background: '#fee2e2',
+                        color: '#991b1b',
+                        border: '1px solid #fca5a5',
+                        padding: '4px 8px',
+                        borderRadius: '8px',
+                        fontSize: '0.68rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '3px'
+                      }}
+                    >
+                      <Trash2 size={11} color="#dc2626" />
+                      <span>{lang === 'en' ? 'Delete' : 'हटवा'}</span>
+                    </button>
                   </div>
                 </div>
               </div>
