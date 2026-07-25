@@ -469,7 +469,7 @@ export default function App() {
                 title="Cloud Realtime Sync Active"
               >
                 <RefreshCw size={10} className={isSyncingCloud ? 'spin-icon' : ''} />
-                <span>{isSyncingCloud ? (lang === 'en' ? 'Syncing...' : 'सिंक होत आहे...') : (lang === 'en' ? '☁️ Auto-Sync (1m)' : '☁️ १ मि. ऑटो-सिंक')}</span>
+                <span>{isSyncingCloud ? (lang === 'en' ? 'Refreshing...' : 'रिफ्रेश होत आहे...') : (lang === 'en' ? '☁️ Auto-Refreshed (1m)' : '☁️ १ मि. ऑटो-रिफ्रेश')}</span>
               </button>
             </div>
             <h2 className="welcome-title">
