@@ -143,26 +143,28 @@ export default function Header({
             <span>{lang === 'en' ? 'मराठी' : 'EN'}</span>
           </button>
 
-          {/* PROMINENT TOP RIGHT OWNER TAB BUTTON */}
+          {/* COMPACT ROUND TOP RIGHT OWNER BUTTON */}
           <button
             onClick={() => setIsOwnerMode(!isOwnerMode)}
+            title={isOwnerMode ? (lang === 'en' ? '👑 Owner Mode Active (Click for Customer Mode)' : '👑 मालक मोड सुरू (ग्राहक मोडवर जाण्यासाठी क्लिक करा)') : (lang === 'en' ? '👑 Owner Admin Mode' : '👑 मालक लॉगिन मोड')}
             style={{
-              background: isOwnerMode ? '#f59e0b' : '#ea580c',
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: isOwnerMode ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
               border: '1.5px solid #fde047',
               color: 'white',
-              padding: '5px 10px',
-              borderRadius: '20px',
-              fontSize: '0.72rem',
-              fontWeight: 800,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '4px',
-              boxShadow: '0 2px 8px rgba(234, 88, 12, 0.4)'
+              justifyContent: 'center',
+              fontSize: '0.85rem',
+              fontWeight: 800,
+              boxShadow: '0 2px 8px rgba(234, 88, 12, 0.45)',
+              flexShrink: 0
             }}
           >
-            <ShieldCheck size={13} color="#fef08a" />
-            <span>{isOwnerMode ? (lang === 'en' ? 'Customer Mode' : 'ग्राहक मोड') : (lang === 'en' ? '👑 Owner' : '👑 मालक')}</span>
+            👑
           </button>
         </div>
       </div>
