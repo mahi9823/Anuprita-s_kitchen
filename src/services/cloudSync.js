@@ -1,14 +1,15 @@
 // 100% Free Realtime Cloud Database Relay Service for Anuprita's Kitchen
 export const CLOUD_BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019f950f-0ccd-7c5d-bc4e-05c29e33d8aa';
 
-// Upload Owner Menu & Today's Special State to Cloud Blob
-export async function pushStateToCloud(items, todayMenu) {
+// Upload Owner Menu, Today's Special State & App Stats to Cloud Blob
+export async function pushStateToCloud(items, todayMenu, stats = null) {
   try {
     const payload = {
       updatedAt: new Date().toISOString(),
       updatedTimestamp: Date.now(),
       items: items,
-      todayMenu: todayMenu
+      todayMenu: todayMenu,
+      stats: stats
     };
 
     const res = await fetch(CLOUD_BLOB_URL, {
@@ -21,7 +22,7 @@ export async function pushStateToCloud(items, todayMenu) {
     });
 
     if (res.ok) {
-      console.log('☁️ [CloudSync] Menu & Prices successfully synced to Cloud for all devices!');
+      console.log('☁️ [CloudSync] Menu & Stats successfully synced to Cloud for all devices!');
       return true;
     }
     return false;

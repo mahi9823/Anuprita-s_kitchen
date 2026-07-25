@@ -58,15 +58,28 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  // App Install & Visitor Tracking State
+  // App Install, Visitor & OTP Signup Live Tracking State (Reset old dummy counts)
   const [installCount, setInstallCount] = useState(() => {
+    const resetKey = 'anuprita_reset_dummy_stats_v3';
+    if (!localStorage.getItem(resetKey)) {
+      localStorage.setItem(resetKey, 'true');
+      localStorage.setItem('anuprita_kitchen_install_count', '0');
+      localStorage.setItem('anuprita_kitchen_visitor_count', '1');
+      localStorage.setItem('anuprita_kitchen_signup_count', '0');
+      return 0;
+    }
     const saved = localStorage.getItem('anuprita_kitchen_install_count');
-    return saved ? parseInt(saved, 10) : 18; // Base installs count
+    return saved ? parseInt(saved, 10) : 0;
   });
 
   const [visitorCount, setVisitorCount] = useState(() => {
     const saved = localStorage.getItem('anuprita_kitchen_visitor_count');
-    return saved ? parseInt(saved, 10) : 142; // Base visitors count
+    return saved ? parseInt(saved, 10) : 1;
+  });
+
+  const [signupCount, setSignupCount] = useState(() => {
+    const saved = localStorage.getItem('anuprita_kitchen_signup_count');
+    return saved ? parseInt(saved, 10) : 0;
   });
 
   const [lastCloudSyncTime, setLastCloudSyncTime] = useState(null);
@@ -333,6 +346,20 @@ export default function App() {
   const handleLoginSuccess = (userObj) => {
     setCurrentUser(userObj);
     setShowAuthModal(false);
+    setSignupCount((prev) => {
+      const updated = prev + 1;
+      localStorage.setItem('anuprita_kitchen_signup_count', updated.toString());
+      return updated;
+    });
+  };
+
+  const handleResetStats = () => {
+    setInstallCount(0);
+    setVisitorCount(1);
+    setSignupCount(0);
+    localStorage.setItem('anuprita_kitchen_install_count', '0');
+    localStorage.setItem('anuprita_kitchen_visitor_count', '1');
+    localStorage.setItem('anuprita_kitchen_signup_count', '0');
   };
 
   const handleLogout = () => {
@@ -435,6 +462,8 @@ export default function App() {
           onUpdateTodayMenu={handleUpdateTodayMenu}
           installCount={installCount}
           visitorCount={visitorCount}
+          signupCount={signupCount}
+          onResetStats={handleResetStats}
         />
       ) : activeTab === 'catering' ? (
         /* Catering Budget & Quantity Calculator View */
