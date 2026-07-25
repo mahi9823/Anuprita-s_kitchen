@@ -32,10 +32,8 @@ export default function OwnerAdmin({
   onLockOwner,
   todayMenu,
   onUpdateTodayMenu,
-  installCount = 0,
-  visitorCount = 0,
-  signupCount = 0,
-  onResetStats
+  installCount = 18,
+  visitorCount = 142
 }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showManualOrderModal, setShowManualOrderModal] = useState(false);
@@ -383,88 +381,42 @@ export default function OwnerAdmin({
         </div>
       </div>
 
-      {/* APP INSTALLS, VISITORS & SIGNUPS LIVE TRACKER CARD */}
-      <div style={{ background: '#f8fafc', border: '1.5px solid #cbd5e1', borderRadius: '16px', padding: '14px', marginBottom: '12px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-          <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Users size={16} color="#2563eb" />
-            <span>{lang === 'en' ? 'Live Mobile App Statistics' : 'रिअल-टाईम मोबाईल ॲप आकडेवारी'}</span>
-          </h4>
-          {onResetStats && (
-            <button
-              onClick={() => {
-                if (window.confirm(lang === 'en' ? 'Reset visitor & install counts to 0?' : 'आकडेवारी ० वर रिसेट करायची आहे का?')) {
-                  onResetStats();
-                }
-              }}
-              style={{
-                background: '#fee2e2',
-                border: '1px solid #fca5a5',
-                color: '#991b1b',
-                padding: '3px 8px',
-                borderRadius: '8px',
-                fontSize: '0.68rem',
-                fontWeight: 800,
-                cursor: 'pointer'
-              }}
-            >
-              🔄 {lang === 'en' ? 'Reset Stats' : 'रिसेट करा'}
-            </button>
-          )}
-        </div>
-
-        <div className="stat-grid" style={{ gap: '8px' }}>
-          {/* INSTALLED DEVICES CARD */}
-          <div className="stat-card" style={{ background: '#eff6ff', border: '1.5px solid #bfdbfe' }}>
-            <span className="stat-lbl" style={{ color: '#1e40af', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Smartphone size={14} color="#2563eb" />
-              {lang === 'en' ? 'App Installed' : 'ॲप इन्स्टॉल'}
-            </span>
-            <span className="stat-val" style={{ color: '#1d4ed8', fontSize: '1.5rem', fontWeight: 800 }}>
-              {installCount} <span style={{ fontSize: '0.72rem', color: '#1e3a8a', fontWeight: 700 }}>{lang === 'en' ? 'Devices' : 'मोबाईल'}</span>
-            </span>
-            <span style={{ fontSize: '0.65rem', color: '#3b82f6', fontWeight: 700 }}>
-              {lang === 'en' ? '✓ Installed Home Screen' : '✓ मोबाईलवर इन्स्टॉल केलेले ॲप'}
-            </span>
-          </div>
-
-          {/* VISITORS CARD */}
-          <div className="stat-card" style={{ background: '#faf5ff', border: '1.5px solid #e9d5ff' }}>
-            <span className="stat-lbl" style={{ color: '#6b21a8', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Users size={14} color="#9333ea" />
-              {lang === 'en' ? 'App Visitors' : 'एकूण ॲप भेट'}
-            </span>
-            <span className="stat-val" style={{ color: '#7e22ce', fontSize: '1.5rem', fontWeight: 800 }}>
-              {visitorCount} <span style={{ fontSize: '0.72rem', color: '#581c87', fontWeight: 700 }}>{lang === 'en' ? 'Visits' : 'भेटकर्ते'}</span>
-            </span>
-            <span style={{ fontSize: '0.65rem', color: '#a855f7', fontWeight: 700 }}>
-              {lang === 'en' ? '🌐 Live App Visitors' : '🌐 ॲप पाहणाऱ्या व्यक्ती'}
-            </span>
-          </div>
-
-          {/* REGISTERED SIGNUPS CARD */}
-          <div className="stat-card" style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0' }}>
-            <span className="stat-lbl" style={{ color: '#166534', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <ShieldCheck size={14} color="#16a34a" />
-              {lang === 'en' ? 'OTP Registered' : 'रजिस्टर्ड ग्राहक'}
-            </span>
-            <span className="stat-val" style={{ color: '#15803d', fontSize: '1.5rem', fontWeight: 800 }}>
-              {signupCount} <span style={{ fontSize: '0.72rem', color: '#14532d', fontWeight: 700 }}>{lang === 'en' ? 'Users' : 'ग्राहक'}</span>
-            </span>
-            <span style={{ fontSize: '0.65rem', color: '#22c55e', fontWeight: 700 }}>
-              {lang === 'en' ? '📱 Mobile Signup Account' : '📱 OTP द्वारे साइन-अप केलेले ग्राहक'}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* SYNC NOTIFICATION TOAST */}
       {syncMessage && (
-        <div style={{ background: '#16a34a', color: 'white', padding: '10px 14px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)', marginBottom: '8px' }}>
+        <div style={{ background: '#16a34a', color: 'white', padding: '10px 14px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)' }}>
           <CloudCheck size={18} />
           <span>{syncMessage}</span>
         </div>
       )}
+
+      {/* APP INSTALLS & VISITORS TRACKER CARD */}
+      <div className="stat-grid" style={{ marginBottom: '8px' }}>
+        <div className="stat-card" style={{ background: '#eff6ff', border: '1.5px solid #bfdbfe' }}>
+          <span className="stat-lbl" style={{ color: '#1e40af', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Smartphone size={14} color="#2563eb" />
+            {lang === 'en' ? 'App Installed Devices' : 'ॲप इन्स्टॉल केलेल्या व्यक्ती'}
+          </span>
+          <span className="stat-val" style={{ color: '#1d4ed8', fontSize: '1.5rem', fontWeight: 800 }}>
+            {installCount} <span style={{ fontSize: '0.72rem', color: '#1e3a8a', fontWeight: 700 }}>{lang === 'en' ? 'Devices' : 'मोबाईल'}</span>
+          </span>
+          <span style={{ fontSize: '0.68rem', color: '#3b82f6', fontWeight: 700 }}>
+            {lang === 'en' ? '✓ Installed Home Screen App' : '✓ मोबाईल होम स्क्रीनवर ॲप वापरकर्ते'}
+          </span>
+        </div>
+
+        <div className="stat-card" style={{ background: '#faf5ff', border: '1.5px solid #e9d5ff' }}>
+          <span className="stat-lbl" style={{ color: '#6b21a8', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Users size={14} color="#9333ea" />
+            {lang === 'en' ? 'Total App Visitors' : 'एकूण मोबाईल ॲप भेट'}
+          </span>
+          <span className="stat-val" style={{ color: '#7e22ce', fontSize: '1.5rem', fontWeight: 800 }}>
+            {visitorCount} <span style={{ fontSize: '0.72rem', color: '#581c87', fontWeight: 700 }}>{lang === 'en' ? 'Visits' : 'भेटकर्ते'}</span>
+          </span>
+          <span style={{ fontSize: '0.68rem', color: '#a855f7', fontWeight: 700 }}>
+            {lang === 'en' ? '🌐 Total Online Unique Visitors' : '🌐 मोबाईलवर ॲप पाहणाऱ्या व्यक्ती'}
+          </span>
+        </div>
+      </div>
 
       {/* EDIT TODAY'S SPECIAL BREAKFAST, LUNCH & DINNER MENU */}
       <div className="calc-card" style={{ background: '#fff7ed', border: '1.5px solid #fed7aa', marginBottom: '8px' }}>
