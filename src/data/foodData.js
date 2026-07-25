@@ -63,7 +63,7 @@ export const TIFFIN_PACKAGES = [
     id: 'tif-single',
     titleMr: '१ दिवसाचा डबा ट्रायल (Single Day Tiffin)',
     titleEn: 'Single Day Trial Tiffin',
-    price: 140,
+    price: 160,
     unitMr: '१ डबा (1 Tiffin)',
     unitEn: '1 Tiffin Meal',
     descriptionMr: '१ दिवस आधी ऑर्डर नोंदवून घरगुती डब्याची चव अजमावून पाहा.',
