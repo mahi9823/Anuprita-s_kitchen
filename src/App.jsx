@@ -130,9 +130,9 @@ export default function App() {
     pushStateToCloud(INITIAL_ITEMS, todayMenu);
     syncFromCloud();
 
-    // Auto-sync every 1 minute (1 * 60 * 1000 = 60000 ms)
-    const ONE_MINUTE = 1 * 60 * 1000;
-    const intervalId = setInterval(syncFromCloud, ONE_MINUTE);
+    // Auto-sync every 2 minutes (2 * 60 * 1000 = 120000 ms)
+    const TWO_MINUTES = 2 * 60 * 1000;
+    const intervalId = setInterval(syncFromCloud, TWO_MINUTES);
 
     // Instant auto-sync whenever customer re-opens or focuses the app tab
     const handleFocus = () => {
@@ -509,7 +509,7 @@ export default function App() {
                 title="Cloud Realtime Sync Active"
               >
                 <RefreshCw size={10} className={isSyncingCloud ? 'spin-icon' : ''} />
-                <span>{isSyncingCloud ? (lang === 'en' ? 'Refreshing...' : 'रिफ्रेश होत आहे...') : (lang === 'en' ? '☁️ Auto-Refreshed (1m)' : '☁️ १ मि. ऑटो-रिफ्रेश')}</span>
+                <span>{isSyncingCloud ? (lang === 'en' ? 'Refreshing...' : 'रिफ्रेश होत आहे...') : (lang === 'en' ? '☁️ Auto-Refreshed (2m)' : '☁️ २ मि. ऑटो-रिफ्रेश')}</span>
               </button>
             </div>
             <h2 className="welcome-title">
@@ -594,7 +594,7 @@ export default function App() {
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#f5f5f4', padding: '4px 14px', borderRadius: '14px', border: '1px solid #e7e5e4' }}>
           <Code size={12} color="#475569" />
           <span>{lang === 'en' ? 'App Developer: ' : 'ॲप डेव्हलपर: '}</span>
-          <strong style={{ color: '#1e293b', fontWeight: 800 }}>Mahesh Hosing</strong>
+          <strong style={{ color: '#1e293b', fontWeight: 800 }}>Mahesh U Hosing</strong>
         </div>
       </footer>
 
