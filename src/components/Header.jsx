@@ -38,24 +38,9 @@ export default function Header({
 
         {/* TOP RIGHT ACTION BUTTONS: PROMINENT OWNER TAB & INSTALL BUTTON */}
         <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          {/* APP INSTALL / DOWNLOAD APK HEADER BUTTON */}
-          {!isOwnerMode && (
-            isStandalone ? (
-              <span style={{
-                background: 'rgba(16, 185, 129, 0.2)',
-                border: '1px solid #10b981',
-                color: '#6ee7b7',
-                padding: '4px 8px',
-                borderRadius: '20px',
-                fontSize: '0.65rem',
-                fontWeight: 800,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px'
-              }}>
-                <CheckCircle2 size={11} /> {lang === 'en' ? 'App Installed' : 'ॲप इन्स्टॉल'}
-              </span>
-            ) : deferredPrompt ? (
+          {/* APP INSTALL / DOWNLOAD APK HEADER BUTTON (Only when app is NOT installed) */}
+          {!isOwnerMode && !isStandalone && (
+            deferredPrompt ? (
               <button
                 onClick={onTriggerInstall}
                 style={{
