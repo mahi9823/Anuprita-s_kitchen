@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Globe, Sparkles, Utensils, User, LogIn, ShieldCheck } from 'lucide-react';
+import { Search, Globe, Sparkles, Utensils, User, LogIn, ShieldCheck, Smartphone, Download, CheckCircle2 } from 'lucide-react';
 import VegSymbol from './VegSymbol';
 
 export default function Header({ 
@@ -11,7 +11,10 @@ export default function Header({
   setIsOwnerMode,
   currentUser,
   onOpenAuth,
-  onOpenProfile
+  onOpenProfile,
+  deferredPrompt,
+  isStandalone,
+  onTriggerInstall
 }) {
   return (
     <header className="header-bar">
@@ -33,8 +36,72 @@ export default function Header({
           </div>
         </div>
 
-        {/* TOP RIGHT ACTION BUTTONS: PROMINENT OWNER TAB */}
+        {/* TOP RIGHT ACTION BUTTONS: PROMINENT OWNER TAB & INSTALL BUTTON */}
         <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {/* APP INSTALL / DOWNLOAD APK HEADER BUTTON */}
+          {!isOwnerMode && (
+            isStandalone ? (
+              <span style={{
+                background: 'rgba(16, 185, 129, 0.2)',
+                border: '1px solid #10b981',
+                color: '#6ee7b7',
+                padding: '4px 8px',
+                borderRadius: '20px',
+                fontSize: '0.65rem',
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}>
+                <CheckCircle2 size={11} /> {lang === 'en' ? 'App Installed' : 'ॲप इन्स्टॉल'}
+              </span>
+            ) : deferredPrompt ? (
+              <button
+                onClick={onTriggerInstall}
+                style={{
+                  background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+                  border: '1px solid #86efac',
+                  color: 'white',
+                  padding: '5px 9px',
+                  borderRadius: '20px',
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 2px 6px rgba(22, 163, 74, 0.4)'
+                }}
+                title={lang === 'en' ? 'Install App on Home Screen' : 'मोबाईल होम स्क्रीनवर ॲप इन्स्टॉल करा'}
+              >
+                <Smartphone size={12} />
+                <span>{lang === 'en' ? 'Install App' : 'ॲप इन्स्टॉल'}</span>
+              </button>
+            ) : (
+              <button
+                onClick={onTriggerInstall}
+                style={{
+                  background: 'linear-gradient(135deg, #9333ea 0%, #7e22ce 100%)',
+                  border: '1px solid #c084fc',
+                  color: 'white',
+                  padding: '5px 9px',
+                  borderRadius: '20px',
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 2px 6px rgba(147, 51, 234, 0.4)'
+                }}
+                title={lang === 'en' ? 'Download Android APK' : 'अँड्रॉइड APK डाउनलोड करा'}
+              >
+                <Download size={12} />
+                <span>{lang === 'en' ? 'Download APK' : 'APK डाउनलोड'}</span>
+              </button>
+            )
+          )}
+
           {/* CUSTOMER LOGIN / PROFILE BUTTON */}
           {!isOwnerMode && (
             currentUser ? (

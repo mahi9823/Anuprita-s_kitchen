@@ -12,6 +12,7 @@ import CustomerOrdersModal from './components/CustomerOrdersModal';
 import OwnerPinModal from './components/OwnerPinModal';
 import TiffinPlans from './components/TiffinPlans';
 import TodaySpecialMenu from './components/TodaySpecialMenu';
+import AppInstallBanner from './components/AppInstallBanner';
 import { INITIAL_ITEMS } from './data/foodData';
 import { pushStateToCloud, fetchStateFromCloud } from './services/cloudSync';
 import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck } from 'lucide-react';
@@ -110,9 +111,71 @@ export default function App() {
     return () => clearInterval(intervalId);
   }, []);
 
+  // PWA Install Prompt State & Handlers
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isStandalone, setIsStandalone] = useState(() => {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || false;
+  });
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    const handleModeChange = (e) => {
+      if (e.matches) setIsStandalone(true);
+    };
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleModeChange);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleTriggerInstall = async () => {
+    if (deferredPrompt) {
+      try {
+        deferredPrompt.prompt();
+        const choiceResult = await deferredPrompt.userChoice;
+        if (choiceResult.outcome === 'accepted') {
+          localStorage.setItem('anuprita_installed_device', 'true');
+          setInstallCount((prev) => {
+            const updated = prev + 1;
+            localStorage.setItem('anuprita_kitchen_install_count', updated.toString());
+            return updated;
+          });
+        }
+        setDeferredPrompt(null);
+      } catch (err) {
+        console.error('PWA install error:', err);
+      }
+    } else {
+      // Trigger Direct APK Download for browsers without PWA install prompt
+      const link = document.createElement('a');
+      link.href = '/anupritas_kitchen.apk';
+      link.download = 'Anupritas_Kitchen_Pure_Veg.apk';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      localStorage.setItem('anuprita_installed_device', 'true');
+      setInstallCount((prev) => {
+        const updated = prev + 1;
+        localStorage.setItem('anuprita_kitchen_install_count', updated.toString());
+        return updated;
+      });
+    }
+  };
+
   // Track app installation and unique mobile visits
   useEffect(() => {
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     const hasTrackedVisit = sessionStorage.getItem('anuprita_visited_session');
 
     if (!hasTrackedVisit) {
@@ -124,7 +187,7 @@ export default function App() {
       });
     }
 
-    if (isStandalone) {
+    if (isStandaloneMode) {
       const hasTrackedInstall = localStorage.getItem('anuprita_installed_device');
       if (!hasTrackedInstall) {
         localStorage.setItem('anuprita_installed_device', 'true');
@@ -332,6 +395,9 @@ export default function App() {
         currentUser={currentUser}
         onOpenAuth={() => setShowAuthModal(true)}
         onOpenProfile={() => setShowProfileModal(true)}
+        deferredPrompt={deferredPrompt}
+        isStandalone={isStandalone}
+        onTriggerInstall={handleTriggerInstall}
       />
 
       {/* Owner Mode View */}
@@ -398,6 +464,15 @@ export default function App() {
                 : 'रोजचा घरगुती डबा, पुरणपोळी थाळी व १००+ व्यक्तींचे कॅटरिंग. १ दिवस आधी ऑर्डर बुक करा.'}
             </p>
           </div>
+
+          {/* Android App Installation / PWA Showcase Banner */}
+          <AppInstallBanner
+            lang={lang}
+            deferredPrompt={deferredPrompt}
+            isStandalone={isStandalone}
+            onTriggerInstall={handleTriggerInstall}
+            installCount={installCount}
+          />
 
           {/* Today's Special Breakfast, Lunch, & Dinner Showcase Card */}
           <TodaySpecialMenu todayMenu={todayMenu} lang={lang} />
