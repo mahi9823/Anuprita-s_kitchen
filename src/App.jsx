@@ -102,10 +102,19 @@ export default function App() {
   const [isOwnerAuthenticated, setIsOwnerAuthenticated] = useState(false);
   const [selectedDetailItem, setSelectedDetailItem] = useState(null);
 
-  // Modals state
+  // Modals & Startup Splash Screen State
+  const [showSplash, setShowSplash] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showOwnerPinModal, setShowOwnerPinModal] = useState(false);
+
+  // App Startup Splash Screen Pause Timer (2.4 seconds)
+  useEffect(() => {
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2400);
+    return () => clearTimeout(splashTimer);
+  }, []);
 
   // AUTOMATIC CLOUD SYNC: Auto-pull latest menu & prices from Cloud database every 5 minutes (300,000 ms) + on app focus!
   useEffect(() => {
@@ -438,6 +447,25 @@ export default function App() {
 
   return (
     <div className="app-container">
+      {/* APP STARTUP BRANDING SPLASH SCREEN PAUSE */}
+      {showSplash && (
+        <div className="splash-screen">
+          <div className="splash-logo-box">
+            <img src="/app_icon.png" alt="Anuprita's Kitchen Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <h1 className="splash-title">Anuprita's Kitchen</h1>
+          <p className="splash-subtitle">
+            {lang === 'en' ? '100% Pure Veg Home Cooked Meals' : 'अनुप्रिताज किचन - १००% शुद्ध घरगुती जेवण'}
+          </p>
+          <p className="splash-tagline">
+            {lang === 'en' ? 'Daily Tiffin • Special Thali • Catering' : 'रोजचा घरगुती डबा • थाळी • कॅटरिंग'}
+          </p>
+          <div className="splash-progress-bar">
+            <div className="splash-progress-fill" />
+          </div>
+        </div>
+      )}
+
       {/* Top Header */}
       <Header
         lang={lang}
