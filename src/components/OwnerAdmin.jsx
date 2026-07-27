@@ -146,7 +146,6 @@ export default function OwnerAdmin({
     const updated = {
       breakfast: breakfastVal,
       lunch: lunchVal,
-      dinner: dinnerVal,
       updatedAt: new Date().toLocaleTimeString()
     };
     onUpdateTodayMenu(updated);

@@ -5,7 +5,7 @@ import { TIFFIN_PACKAGES } from '../data/foodData';
 export default function TiffinPlans({ lang, whatsappNumber }) {
   const handleInquireTiffin = (pkg) => {
     const title = lang === 'en' ? pkg.titleEn : pkg.titleMr;
-    const msgEn = `Hello Reva Hosing! I would like to inquire about the *${title}* for daily lunch/dinner tiffin service.%0A%0A` +
+    const msgEn = `Hello Reva Hosing! I would like to inquire about the *${title}* for daily lunch tiffin service.%0A%0A` +
       `📌 *Package:* ${title}%0A` +
       `💰 *Price:* ₹${pkg.price} (${lang === 'en' ? pkg.unitEn : pkg.unitMr})%0A%0A` +
       `Please let me know start date & details. Thank you!`;
@@ -26,8 +26,8 @@ export default function TiffinPlans({ lang, whatsappNumber }) {
         </h2>
         <p className="welcome-subtitle">
           {lang === 'en' 
-            ? 'Freshly cooked home meals delivered for lunch & dinner. Book 1 day in advance.' 
-            : 'दुपारी व रात्रीच्या जेवणासाठी गरमागरम शुद्ध घरगुती डबा. १ दिवस आधी नाव नोंदणी करा.'}
+            ? 'Freshly cooked home meals delivered for lunch. Book 1 day in advance.' 
+            : 'दुपारच्या जेवणासाठी गरमागरम शुद्ध घरगुती डबा. १ दिवस आधी नाव नोंदणी करा.'}
         </p>
       </div>
 

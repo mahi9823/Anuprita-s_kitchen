@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sun, Moon, Coffee, ChefHat, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sun, Coffee, ChefHat, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function TodaySpecialMenu({ todayMenu, lang }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -58,13 +58,6 @@ export default function TodaySpecialMenu({ todayMenu, lang }) {
               <Sun size={13} color="#ea580c" />
               <strong style={{ color: '#ea580c', minWidth: '55px' }}>{lang === 'en' ? 'Lunch:' : 'दुपारी:'}</strong>
               <span style={{ color: '#44403c' }}>{todayMenu.lunch || '-'}</span>
-            </div>
-
-            {/* Dinner */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem' }}>
-              <Moon size={13} color="#3730a3" />
-              <strong style={{ color: '#3730a3', minWidth: '55px' }}>{lang === 'en' ? 'Dinner:' : 'रात्री:'}</strong>
-              <span style={{ color: '#44403c' }}>{todayMenu.dinner || '-'}</span>
             </div>
           </div>
         )}

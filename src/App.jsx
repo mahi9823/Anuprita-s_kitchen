@@ -35,11 +35,10 @@ export default function App() {
   });
 
   const [todayMenu, setTodayMenu] = useState(() => {
-    const todayKey = 'anuprita_today_menu_v36_std_veg';
+    const todayKey = 'anuprita_today_menu_v38_no_dinner';
     const newMenu = {
       breakfast: 'कांदा पोहे व कोथिंबीर वडी (Kanda Pohe & Kothimbir Vadi)',
-      lunch: 'विशेष पुरणपोळी थाळी - २ पुरणपोळी, कटाची आमटी, बटाटा भाजी, भात व भजी',
-      dinner: 'बेसन पिठलं + शेव भाजी + ज्वारी भाकरी व भात'
+      lunch: 'विशेष पुरणपोळी थाळी - २ पुरणपोळी, कटाची आमटी, बटाटा भाजी, भात व भजी'
     };
 
     if (!localStorage.getItem(todayKey)) {
