@@ -37,14 +37,10 @@ export default function TodaySpecialMenu({ todayMenu, lang }) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '0.65rem', background: '#fff7ed', color: '#c2410c', padding: '2px 8px', borderRadius: '10px', fontWeight: 800, border: '1px solid #ffedd5' }}>
-              {lang === 'en' ? 'Fresh' : 'ताजा'}
+            <span style={{ fontSize: '0.65rem', background: '#fff7ed', color: '#c2410c', padding: '3px 9px', borderRadius: '10px', fontWeight: 800, border: '1px solid #ffedd5', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+              <span>{lang === 'en' ? 'Fresh' : 'ताजा'}</span>
+              {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
             </span>
-            <button 
-              style={{ background: 'none', border: 'none', color: '#9a3412', cursor: 'pointer', display: 'flex', padding: 0 }}
-            >
-              {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </button>
           </div>
         </div>
 

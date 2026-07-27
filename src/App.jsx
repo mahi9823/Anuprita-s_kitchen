@@ -35,11 +35,11 @@ export default function App() {
   });
 
   const [todayMenu, setTodayMenu] = useState(() => {
-    const todayKey = 'anuprita_today_menu_v34_ekadashi_upvas';
+    const todayKey = 'anuprita_today_menu_v36_std_veg';
     const newMenu = {
-      breakfast: 'साबूदाणा खिचडी (Sabudana Khichdi)',
-      lunch: 'एकादशी उपवास स्पेशल थाळी - उपवास टिक्की, साबूदाणा खिचडी, काकडी कोशिंबीर व रताळे कीस',
-      dinner: 'एकादशी उपवास स्पेशल थाळी - उपवास टिक्की, साबूदाणा खिचडी, काकडी कोशिंबीर व रताळे कीस'
+      breakfast: 'कांदा पोहे व कोथिंबीर वडी (Kanda Pohe & Kothimbir Vadi)',
+      lunch: 'विशेष पुरणपोळी थाळी - २ पुरणपोळी, कटाची आमटी, बटाटा भाजी, भात व भजी',
+      dinner: 'बेसन पिठलं + शेव भाजी + ज्वारी भाकरी व भात'
     };
 
     if (!localStorage.getItem(todayKey)) {
