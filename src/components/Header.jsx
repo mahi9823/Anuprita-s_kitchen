@@ -125,18 +125,44 @@ export default function Header({
 
       {!isOwnerMode && (
         <div className="search-container">
-          <Search size={18} className="search-icon" />
+          <Search size={16} className="search-icon" color="#9ca3af" />
           <input
             type="text"
             className="search-input"
             placeholder={
               lang === 'en' 
-                ? 'Search: Puran Poli, Modak, Veg Thali, Idli, Wada Pav...' 
+                ? 'Search: Puran Poli, Modak, Veg Thali, Idli...' 
                 : 'शोधा: पुरणपोळी, इडली, वाडा पाव, पिठलं भाकरी...'
             }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              style={{
+                position: 'absolute',
+                right: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: '#e5e7eb',
+                border: 'none',
+                borderRadius: '50%',
+                width: '18px',
+                height: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#4b5563',
+                fontSize: '0.7rem',
+                fontWeight: 'bold'
+              }}
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
         </div>
       )}
     </header>
