@@ -8,39 +8,20 @@ export default function AppInstallBanner({
   onTriggerInstall,
   installCount
 }) {
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    return localStorage.getItem('anuprita_install_banner_dismissed') === 'true';
+  });
   const [showApkGuide, setShowApkGuide] = useState(false);
 
-  // If already running inside standalone installed PWA
-  if (isStandalone) {
-    return (
-      <div style={{ padding: '0 10px 10px 10px' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #064e3b 0%, #047857 100%)',
-          borderRadius: '12px',
-          padding: '8px 12px',
-          display: 'flex',
-          alignItems: 'center',
-          justify: 'space-between',
-          color: 'white',
-          boxShadow: '0 2px 8px rgba(4, 120, 87, 0.25)',
-          border: '1px solid #10b981'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <CheckCircle2 size={16} color="#6ee7b7" />
-            <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>
-              {lang === 'en' ? "Anuprita's Kitchen App Installed ✓" : 'अनुप्रिताज किचन ॲप होम स्क्रीनवर सेव्ह आहे ✓'}
-            </span>
-          </div>
-          <span style={{ fontSize: '0.65rem', background: 'rgba(255, 255, 255, 0.2)', padding: '2px 8px', borderRadius: '10px', fontWeight: 800 }}>
-            {lang === 'en' ? 'PWA Active' : 'ॲप ॲक्टिव्ह'}
-          </span>
-        </div>
-      </div>
-    );
-  }
+  const handleDismiss = () => {
+    setIsDismissed(true);
+    localStorage.setItem('anuprita_install_banner_dismissed', 'true');
+  };
 
-  if (isDismissed) return null;
+  // If already running inside standalone installed PWA
+  if (isStandalone || isDismissed) {
+    return null;
+  }
 
   const isPwaSupported = Boolean(deferredPrompt);
 
@@ -55,162 +36,73 @@ export default function AppInstallBanner({
 
   return (
     <>
-      <div style={{ padding: '0 10px 12px 10px' }}>
+      <div style={{ padding: '4px 10px 8px 10px' }}>
         <div 
           style={{
-            background: isPwaSupported
-              ? 'linear-gradient(135deg, #1c1917 0%, #292524 60%, #451a03 100%)'
-              : 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #311042 100%)',
+            background: 'linear-gradient(135deg, #18181b 0%, #27272a 100%)',
             color: 'white',
-            borderRadius: '16px',
-            padding: '14px 16px',
-            border: isPwaSupported ? '1.5px solid #f97316' : '1.5px solid #a855f7',
-            boxShadow: isPwaSupported 
-              ? '0 6px 20px rgba(234, 88, 12, 0.25)' 
-              : '0 6px 20px rgba(168, 85, 247, 0.25)',
-            position: 'relative',
-            overflow: 'hidden'
+            borderRadius: '12px',
+            padding: '8px 12px',
+            border: '1px solid #3f3f46',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.12)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '8px',
+            position: 'relative'
           }}
         >
-          {/* Close button */}
-          <button
-            onClick={() => setIsDismissed(true)}
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: 'none',
-              color: '#d6d3d1',
-              borderRadius: '50%',
-              width: '24px',
-              height: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer'
-            }}
-            title="Dismiss Banner"
-          >
-            <X size={14} />
-          </button>
-
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-            {/* App Icon Box */}
-            <div style={{
-              width: '52px',
-              height: '52px',
-              borderRadius: '14px',
-              overflow: 'hidden',
-              flexShrink: 0,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-              border: '2px solid rgba(255, 255, 255, 0.2)'
-            }}>
-              <img src="/app_icon.png" alt="App Icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-
-            <div style={{ flex: 1, paddingRight: '16px' }}>
-              {/* Header Badge */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                <span style={{
-                  fontSize: '0.62rem',
-                  fontWeight: 800,
-                  background: isPwaSupported ? '#ea580c' : '#9333ea',
-                  color: 'white',
-                  padding: '2px 8px',
-                  borderRadius: '10px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}>
-                  {isPwaSupported ? <Sparkles size={10} /> : <Smartphone size={10} />}
-                  {isPwaSupported 
-                    ? (lang === 'en' ? 'PWA Supported Browser' : 'PWA इन्स्टॉलेशन सपोर्टेड')
-                    : (lang === 'en' ? 'Android APK Download' : 'Direct Android APK')}
-                </span>
-                <span style={{ fontSize: '0.65rem', color: '#fbbf24', fontWeight: 700 }}>
-                  ⭐ 4.9 ({installCount}+ {lang === 'en' ? 'users' : 'वापरकर्ते'})
-                </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+            <img src="/app_icon.png" alt="App Icon" style={{ width: '28px', height: '28px', borderRadius: '7px', flexShrink: 0, objectFit: 'cover' }} />
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {isPwaSupported
+                  ? (lang === 'en' ? 'Anuprita\'s Kitchen App' : 'अनुप्रिताज किचन ॲप')
+                  : (lang === 'en' ? 'Download Android App' : 'अँड्रॉइड ॲप डाउनलोड करा')}
               </div>
-
-              {/* Title */}
-              <h3 style={{ fontSize: '0.98rem', fontWeight: 800, margin: '0 0 2px 0', color: '#ffffff', fontFamily: "'Outfit', sans-serif" }}>
-                {isPwaSupported
-                  ? (lang === 'en' ? 'Install Anuprita\'s Kitchen App' : 'अनुप्रिताज किचन ॲप इन्स्टॉल करा')
-                  : (lang === 'en' ? 'Download Android APK App' : 'Android APK ॲप डाउनलोड करा')}
-              </h3>
-
-              {/* Subtitle */}
-              <p style={{ fontSize: '0.73rem', color: '#e7e5e4', margin: '0 0 10px 0', lineHeight: 1.35 }}>
-                {isPwaSupported
-                  ? (lang === 'en' 
-                      ? 'Add to mobile home screen for 1-click ordering, instant tiffin alerts & offline menu.' 
-                      : '१-क्लिक ऑर्डरिंग व ताज्या डबा अपडेट्ससाठी मोबाईल होम स्क्रीनवर ॲप जोडा.')
-                  : (lang === 'en' 
-                      ? 'Download official Android APK for direct phone installation & fast tiffin ordering.' 
-                      : 'थेट फोनवर इन्स्टॉल करण्यासाठी ऑफिशियल अँड्रॉइड APK ॲप डाऊनलोड करा.')}
-              </p>
-
-              {/* Action Buttons Container */}
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <button
-                  onClick={handleMainButtonClick}
-                  style={{
-                    background: isPwaSupported
-                      ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)'
-                      : 'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 14px',
-                    borderRadius: '10px',
-                    fontSize: '0.78rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    boxShadow: isPwaSupported
-                      ? '0 4px 12px rgba(234, 88, 12, 0.4)'
-                      : '0 4px 12px rgba(168, 85, 247, 0.4)'
-                  }}
-                >
-                  {isPwaSupported ? (
-                    <>
-                      <Smartphone size={14} />
-                      <span>{lang === 'en' ? 'Install App (1-Tap)' : '📲 ॲप इन्स्टॉल करा'}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Download size={14} />
-                      <span>{lang === 'en' ? 'Download APK (Android)' : '🤖 APK डाउनलोड करा'}</span>
-                    </>
-                  )}
-                  <ArrowRight size={12} />
-                </button>
-
-                {!isPwaSupported && (
-                  <button
-                    onClick={() => setShowApkGuide(true)}
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.12)',
-                      color: 'white',
-                      border: '1px solid rgba(255, 255, 255, 0.25)',
-                      padding: '8px 10px',
-                      borderRadius: '10px',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <Info size={12} />
-                    <span>{lang === 'en' ? 'How to Install?' : 'कसे इन्स्टॉल करावे?'}</span>
-                  </button>
-                )}
+              <div style={{ fontSize: '0.65rem', color: '#a1a1aa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {lang === 'en' ? 'Fast ordering from home screen' : 'होम स्क्रीनवरून जलद ऑर्डर करा'}
               </div>
             </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <button
+              onClick={handleMainButtonClick}
+              style={{
+                background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '4px 10px',
+                borderRadius: '8px',
+                fontSize: '0.7rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <Smartphone size={11} />
+              <span>{lang === 'en' ? 'Install' : 'इन्स्टॉल'}</span>
+            </button>
+
+            <button
+              onClick={handleDismiss}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#71717a',
+                padding: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="Dismiss"
+            >
+              <X size={14} />
+            </button>
           </div>
         </div>
       </div>

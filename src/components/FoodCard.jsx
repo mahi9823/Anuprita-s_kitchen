@@ -28,71 +28,40 @@ export default function FoodCard({
         />
 
         <div className="badge-container">
-          <VegSymbol size={20} />
+          <VegSymbol size={18} />
 
           {item.isBestseller && (
             <span className="bestseller-badge">
-              {lang === 'mr' ? 'लोकावडता' : 'Bestseller'}
+              {lang === 'mr' ? 'लोकप्रिय' : 'Bestseller'}
             </span>
           )}
 
           {item.isUpvas && (
             <span className="upvas-badge">
-              {lang === 'mr' ? 'उपवास खास' : 'Upvas Special'}
-            </span>
-          )}
-
-          {isOrderClosed && (
-            <span style={{ background: '#dc2626', color: 'white', fontSize: '0.62rem', fontWeight: 800, padding: '2px 6px', borderRadius: '4px' }}>
-              {lang === 'mr' ? '🚫 २ दिवसांची ऑर्डर बंद' : '🚫 2 Days Notice Expired'}
+              {lang === 'mr' ? 'उपवास' : 'Upvas'}
             </span>
           )}
         </div>
 
         <div className="rating-badge">
-          <Star size={11} fill="#fbbf24" color="#fbbf24" />
+          <Star size={10} fill="#fbbf24" color="#fbbf24" />
           <span>{item.rating}</span>
-          <span style={{ fontSize: '0.62rem', opacity: 0.8 }}>({item.reviewsCount})</span>
         </div>
       </div>
 
       <div className="food-content">
         <div className="food-header-row">
-          <div>
-            <h3 
-              className="food-title" 
-              onClick={() => onOpenDetails(item)} 
-              style={{ cursor: 'pointer' }}
-            >
-              {lang === 'mr' ? item.titleMr : item.titleEn}
-            </h3>
-
-            {/* CALORIES & PROTEIN NUTRITION BADGES */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <h3 
+                className="food-title" 
+                onClick={() => onOpenDetails(item)} 
+                style={{ cursor: 'pointer', margin: 0 }}
+              >
+                {lang === 'mr' ? item.titleMr : item.titleEn}
+              </h3>
               <span className="unit-tag">{lang === 'mr' ? item.unit : item.unitEn}</span>
-
-              {item.calories && (
-                <span style={{ fontSize: '0.68rem', color: '#dc2626', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '2px', background: '#fef2f2', padding: '1px 6px', borderRadius: '6px', border: '1px solid #fecaca' }}>
-                  <Flame size={10} color="#dc2626" />
-                  <span>{item.calories} kcal</span>
-                </span>
-              )}
-
-              {item.protein && (
-                <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '2px', background: '#f0fdf4', padding: '1px 6px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
-                  <Dumbbell size={10} color="#16a34a" />
-                  <span>{item.protein} {lang === 'mr' ? 'प्रथिने' : 'Protein'}</span>
-                </span>
-              )}
             </div>
-
-            {/* ADVANCE NOTICE CALLOUT BADGE */}
-            {item.advanceNoticeEn && (
-              <div style={{ marginTop: '4px', fontSize: '0.66rem', fontWeight: 800, color: '#9a3412', background: '#fff7ed', border: '1px solid #ffedd5', padding: '2px 7px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <Calendar size={10} color="#ea580c" />
-                <span>{lang === 'mr' ? item.advanceNoticeMr : item.advanceNoticeEn}</span>
-              </div>
-            )}
           </div>
 
           <div className="food-price">
@@ -100,7 +69,11 @@ export default function FoodCard({
           </div>
         </div>
 
-        <p className="food-desc">
+        <p 
+          className="food-desc"
+          onClick={() => onOpenDetails(item)} 
+          style={{ cursor: 'pointer' }}
+        >
           {lang === 'mr' ? item.descriptionMr : item.descriptionEn}
         </p>
 
@@ -110,34 +83,34 @@ export default function FoodCard({
             style={{
               background: 'none',
               border: 'none',
-              color: '#ea580c',
-              fontSize: '0.75rem',
-              fontWeight: 700,
+              color: '#78716c',
+              fontSize: '0.72rem',
+              fontWeight: 600,
               display: 'flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '3px',
               cursor: 'pointer',
               padding: '2px 0'
             }}
           >
-            <Info size={13} />
-            <span>{lang === 'mr' ? 'पोषण मूल्य पाहा' : 'Nutrition Details'}</span>
+            <Info size={12} color="#ea580c" />
+            <span>{lang === 'mr' ? 'तपशील' : 'Details'}</span>
           </button>
 
           {isOrderClosed ? (
             <button 
               className="add-btn"
               disabled
-              style={{ background: '#9ca3af', color: 'white', cursor: 'not-allowed', border: 'none', padding: '6px 12px', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}
+              style={{ background: '#9ca3af', color: 'white', cursor: 'not-allowed', border: 'none', padding: '5px 10px', borderRadius: '14px', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px' }}
             >
-              <Lock size={12} />
-              <span>{lang === 'mr' ? 'ऑर्डर बंद' : 'Order Closed'}</span>
+              <Lock size={11} />
+              <span>{lang === 'mr' ? 'ऑर्डर बंद' : 'Closed'}</span>
             </button>
           ) : !item.inStock ? (
             <button 
               className="add-btn"
               disabled
-              style={{ background: '#dc2626', color: 'white', cursor: 'not-allowed', border: 'none', padding: '6px 12px', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 800 }}
+              style={{ background: '#dc2626', color: 'white', cursor: 'not-allowed', border: 'none', padding: '5px 10px', borderRadius: '14px', fontSize: '0.72rem', fontWeight: 800 }}
             >
               <span>{lang === 'mr' ? 'संपले' : 'Out of Stock'}</span>
             </button>
@@ -146,7 +119,7 @@ export default function FoodCard({
               className="add-btn"
               onClick={() => onUpdateCart(item.id, 1)}
             >
-              <Plus size={15} />
+              <Plus size={14} />
               <span>{lang === 'mr' ? 'जोडा' : 'ADD'}</span>
             </button>
           ) : (
@@ -155,14 +128,14 @@ export default function FoodCard({
                 className="stepper-btn"
                 onClick={() => onUpdateCart(item.id, cartQty - 1)}
               >
-                <Minus size={12} />
+                <Minus size={11} />
               </button>
               <span className="stepper-val">{cartQty}</span>
               <button 
                 className="stepper-btn"
                 onClick={() => onUpdateCart(item.id, cartQty + 1)}
               >
-                <Plus size={12} />
+                <Plus size={11} />
               </button>
             </div>
           )}

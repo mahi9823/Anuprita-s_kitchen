@@ -36,57 +36,8 @@ export default function Header({
           </div>
         </div>
 
-        {/* TOP RIGHT ACTION BUTTONS: PROMINENT OWNER TAB & INSTALL BUTTON */}
-        <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          {/* APP INSTALL / DOWNLOAD APK HEADER BUTTON (Only when app is NOT installed) */}
-          {!isOwnerMode && !isStandalone && (
-            deferredPrompt ? (
-              <button
-                onClick={onTriggerInstall}
-                style={{
-                  background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
-                  border: '1px solid #86efac',
-                  color: 'white',
-                  padding: '5px 9px',
-                  borderRadius: '20px',
-                  fontSize: '0.7rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  boxShadow: '0 2px 6px rgba(22, 163, 74, 0.4)'
-                }}
-                title={lang === 'en' ? 'Install App on Home Screen' : 'मोबाईल होम स्क्रीनवर ॲप इन्स्टॉल करा'}
-              >
-                <Smartphone size={12} />
-                <span>{lang === 'en' ? 'Install App' : 'ॲप इन्स्टॉल'}</span>
-              </button>
-            ) : (
-              <button
-                onClick={onTriggerInstall}
-                style={{
-                  background: 'linear-gradient(135deg, #9333ea 0%, #7e22ce 100%)',
-                  border: '1px solid #c084fc',
-                  color: 'white',
-                  padding: '5px 9px',
-                  borderRadius: '20px',
-                  fontSize: '0.7rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  boxShadow: '0 2px 6px rgba(147, 51, 234, 0.4)'
-                }}
-                title={lang === 'en' ? 'Download Android APK' : 'अँड्रॉइड APK डाउनलोड करा'}
-              >
-                <Download size={12} />
-                <span>{lang === 'en' ? 'Download APK' : 'APK डाउनलोड'}</span>
-              </button>
-            )
-          )}
-
+        {/* TOP RIGHT ACTION BUTTONS */}
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
           {/* CUSTOMER LOGIN / PROFILE AVATAR BUTTON */}
           {!isOwnerMode && (
             currentUser ? (
@@ -100,7 +51,7 @@ export default function Header({
                   background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
                   border: '1.5px solid #f59e0b',
                   color: '#78350f',
-                  fontSize: '0.9rem',
+                  fontSize: '0.85rem',
                   fontWeight: 900,
                   cursor: 'pointer',
                   display: 'flex',
@@ -117,11 +68,11 @@ export default function Header({
                 onClick={onOpenAuth}
                 style={{
                   background: 'rgba(255, 255, 255, 0.12)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
                   color: 'white',
-                  padding: '5px 9px',
-                  borderRadius: '20px',
-                  fontSize: '0.7rem',
+                  padding: '5px 10px',
+                  borderRadius: '16px',
+                  fontSize: '0.72rem',
                   fontWeight: 700,
                   cursor: 'pointer',
                   display: 'flex',
@@ -129,7 +80,7 @@ export default function Header({
                   gap: '4px'
                 }}
               >
-                <LogIn size={12} />
+                <LogIn size={13} />
                 <span>{lang === 'en' ? 'Login' : 'लॉगिन'}</span>
               </button>
             )
@@ -140,16 +91,16 @@ export default function Header({
             className="lang-btn" 
             onClick={() => setLang(lang === 'en' ? 'mr' : 'en')}
             title="Switch Language"
-            style={{ padding: '5px 8px', fontSize: '0.7rem' }}
+            style={{ padding: '5px 9px', fontSize: '0.72rem', borderRadius: '16px' }}
           >
-            <Globe size={12} />
+            <Globe size={13} />
             <span>{lang === 'en' ? 'मराठी' : 'EN'}</span>
           </button>
 
           {/* COMPACT ROUND TOP RIGHT OWNER BUTTON */}
           <button
             onClick={() => setIsOwnerMode(!isOwnerMode)}
-            title={isOwnerMode ? (lang === 'en' ? '👑 Owner Mode Active (Click for Customer Mode)' : '👑 मालक मोड सुरू (ग्राहक मोडवर जाण्यासाठी क्लिक करा)') : (lang === 'en' ? '👑 Owner Admin Mode' : '👑 मालक लॉगिन मोड')}
+            title={isOwnerMode ? (lang === 'en' ? '👑 Owner Mode Active' : '👑 मालक मोड सुरू') : (lang === 'en' ? '👑 Owner Admin Mode' : '👑 मालक लॉगिन मोड')}
             style={{
               width: '32px',
               height: '32px',

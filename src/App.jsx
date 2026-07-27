@@ -480,49 +480,8 @@ export default function App() {
         <CateringCalculator lang={lang} whatsappNumber={whatsappNumber} />
       ) : (
         /* Customer Menu Showcase View */
-        <main>
-          {/* Welcome Banner */}
-          <div className="welcome-banner">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="welcome-badge">
-                <Sparkles size={11} style={{ display: 'inline', marginRight: '3px' }} />
-                {lang === 'en' ? 'Daily Tiffin & Home Catering' : 'रोजचा डबा व घरगुती कॅटरिंग'}
-              </span>
-
-              {/* REALTIME CLOUD LIVE SYNC BADGE */}
-              <button
-                onClick={handleForceRefreshMenu}
-                style={{
-                  background: isSyncingCloud ? '#2563eb' : '#16a34a',
-                  color: 'white',
-                  border: 'none',
-                  padding: '3px 8px',
-                  borderRadius: '10px',
-                  fontSize: '0.65rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  boxShadow: '0 2px 6px rgba(22, 163, 74, 0.3)'
-                }}
-                title="Cloud Realtime Sync Active"
-              >
-                <RefreshCw size={10} className={isSyncingCloud ? 'spin-icon' : ''} />
-                <span>{isSyncingCloud ? (lang === 'en' ? 'Refreshing...' : 'रिफ्रेश होत आहे...') : (lang === 'en' ? '☁️ Auto-Refreshed (2m)' : '☁️ २ मि. ऑटो-रिफ्रेश')}</span>
-              </button>
-            </div>
-            <h2 className="welcome-title">
-              {lang === 'en' ? "Anuprita's Kitchen - Home Cooked Veg" : "अनुप्रिताज किचन - शुद्ध घरगुती जेवण"}
-            </h2>
-            <p className="welcome-subtitle">
-              {lang === 'en' 
-                ? 'Daily lunch & dinner tiffin plans, thali meals & bulk catering up to 100+ guests. Please book 1 day in advance.' 
-                : 'रोजचा घरगुती डबा, पुरणपोळी थाळी व १००+ व्यक्तींचे कॅटरिंग. १ दिवस आधी ऑर्डर बुक करा.'}
-            </p>
-          </div>
-
-          {/* Android App Installation / PWA Showcase Banner */}
+        <main style={{ paddingBottom: '12px' }}>
+          {/* Android App Installation Banner (Compact) */}
           <AppInstallBanner
             lang={lang}
             deferredPrompt={deferredPrompt}
@@ -531,10 +490,10 @@ export default function App() {
             installCount={installCount}
           />
 
-          {/* Today's Special Breakfast, Lunch, & Dinner Showcase Card */}
+          {/* Today's Special Menu Showcase Card */}
           <TodaySpecialMenu todayMenu={todayMenu} lang={lang} />
 
-          {/* Category Filter Pills & Tags */}
+          {/* Category Filter Pills */}
           <CategoryFilter
             selectedCat={selectedCat}
             setSelectedCat={setSelectedCat}
@@ -583,19 +542,11 @@ export default function App() {
         </main>
       )}
 
-      {/* App Owner & Developer Branding Footer */}
-      <footer style={{ textAlign: 'center', padding: '16px 10px 12px 10px', color: '#78716c', fontSize: '0.72rem', fontWeight: 600, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#fff7ed', padding: '4px 14px', borderRadius: '14px', border: '1px solid #fed7aa', boxShadow: '0 2px 6px rgba(234, 88, 12, 0.1)' }}>
-          <Sparkles size={12} color="#ea580c" />
-          <span>{lang === 'en' ? 'Kitchen Owner: ' : 'मालक: '}</span>
-          <strong style={{ color: '#c2410c', fontWeight: 800 }}>Reva Mahesh Hosing</strong>
-        </div>
-
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#f5f5f4', padding: '4px 14px', borderRadius: '14px', border: '1px solid #e7e5e4' }}>
-          <Code size={12} color="#475569" />
-          <span>{lang === 'en' ? 'App Developer: ' : 'ॲप डेव्हलपर: '}</span>
-          <strong style={{ color: '#1e293b', fontWeight: 800 }}>Mahesh U Hosing</strong>
-        </div>
+      {/* Clean & Subtle Footer */}
+      <footer style={{ textAlign: 'center', padding: '12px 10px 16px 10px', color: '#a8a29e', fontSize: '0.7rem', fontWeight: 600, display: 'flex', justifyContent: 'center', gap: '12px' }}>
+        <span>{lang === 'en' ? 'Owner: Reva M. Hosing' : 'मालक: रेवा म. होसिंग'}</span>
+        <span>•</span>
+        <span>{lang === 'en' ? 'Dev: Mahesh U. Hosing' : 'डेव्हलपर: महेश उ. होसिंग'}</span>
       </footer>
 
       {/* Cart Modal / Drawer */}

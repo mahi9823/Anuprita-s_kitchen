@@ -19,8 +19,8 @@ export default function CategoryFilter({
   lang 
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-      <div className="filter-pills">
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <div className="filter-pills" style={{ padding: 0 }}>
         {INITIAL_CATEGORIES.map((cat) => {
           const IconComponent = iconMap[cat.icon] || Utensils;
           const isActive = selectedCat === cat.id;
@@ -31,30 +31,20 @@ export default function CategoryFilter({
               className={`pill-item ${isActive ? 'active' : ''}`}
               onClick={() => setSelectedCat(cat.id)}
             >
-              <IconComponent size={14} />
+              <IconComponent size={13} />
               <span>{lang === 'mr' ? cat.nameMr : cat.nameEn}</span>
             </button>
           );
         })}
-      </div>
 
-      <div className="veg-toggle-bar">
+        {/* Upvas Fasting Tag Toggle Button inline with category pills */}
         <button
-          className={`tag-btn veg active`}
-          style={{ background: '#dcfce7', color: '#15803d', borderColor: '#86efac' }}
-        >
-          <Leaf size={14} />
-          <span>{lang === 'mr' ? '१००% शुद्ध शाकाहारी मेनू' : '100% Pure Veg Menu'}</span>
-          <Check size={12} />
-        </button>
-
-        <button
-          className={`tag-btn upvas ${vegFilter === 'upvas' ? 'active' : ''}`}
+          className={`pill-item ${vegFilter === 'upvas' ? 'active' : ''}`}
+          style={vegFilter === 'upvas' ? {} : { background: '#fef3c7', color: '#92400e', borderColor: '#fde68a' }}
           onClick={() => setVegFilter(vegFilter === 'upvas' ? 'all' : 'upvas')}
         >
-          <Flame size={12} color="#b45309" />
+          <Flame size={13} color={vegFilter === 'upvas' ? 'white' : '#b45309'} />
           <span>{lang === 'mr' ? 'उपवास खास' : 'Fasting Only'}</span>
-          {vegFilter === 'upvas' && <Check size={12} />}
         </button>
       </div>
     </div>
