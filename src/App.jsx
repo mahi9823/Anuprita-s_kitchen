@@ -20,17 +20,18 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v35 for Bhagar Shengdana Amti menu addition
-    const versionKey = 'anuprita_kitchen_v35_bhagar_amti';
+    // Force reset cache version key to v39 for Aloo Paratha menu addition
+    const versionKey = 'anuprita_kitchen_v39_aloo_paratha';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v35', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v39', JSON.stringify(INITIAL_ITEMS));
+      pushStateToCloud(INITIAL_ITEMS, todayMenu);
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v35');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v39');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
@@ -108,11 +109,11 @@ export default function App() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showOwnerPinModal, setShowOwnerPinModal] = useState(false);
 
-  // App Startup Splash Screen Pause Timer (2.4 seconds)
+  // App Startup Splash Screen Pause Timer (3.8 seconds)
   useEffect(() => {
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
-    }, 2400);
+    }, 3800);
     return () => clearTimeout(splashTimer);
   }, []);
 
@@ -273,7 +274,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    localStorage.setItem('anuprita_kitchen_items_v35', JSON.stringify(items));
+    localStorage.setItem('anuprita_kitchen_items_v39', JSON.stringify(items));
   }, [items]);
 
   useEffect(() => {

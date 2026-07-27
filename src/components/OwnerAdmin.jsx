@@ -3,6 +3,7 @@ import { Plus, Edit2, CheckCircle, Clock, TrendingUp, ShoppingBag, Package, Powe
 import { pushStateToCloud } from '../services/cloudSync';
 
 const PRESET_APP_PHOTOS = [
+  { label: 'गरमागरम आलू पराठा (Aloo Paratha)', url: '/images/aloo_paratha.jpg' },
   { label: 'शेवभाजी व बाजरी भाकरी थाळी (Shev Bhaji)', url: '/images/shev_bhaji_thali_1784915706656.jpg' },
   { label: 'भाजणीचे थालीपीठ (Thalipith)', url: '/images/thalipith_1784915295277.jpg' },
   { label: 'दाक्षिणात्य इडली सांबार (Idli Sambar)', url: '/images/idli_sambar_1784903222164.jpg' },
