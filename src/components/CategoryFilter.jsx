@@ -1,5 +1,5 @@
 import React from 'react';
-import { Utensils, UtensilsCrossed, Cookie, Cake, Flame, Users, Check, Leaf } from 'lucide-react';
+import { Utensils, UtensilsCrossed, Cookie, Cake, Flame, Users, Check, Leaf, Coffee, Sparkles, Heart, Smile, ShoppingBag } from 'lucide-react';
 import { INITIAL_CATEGORIES } from '../data/foodData';
 
 const iconMap = {
@@ -8,7 +8,12 @@ const iconMap = {
   Cookie,
   Cake,
   Flame,
-  Users
+  Users,
+  Coffee,
+  Sparkles,
+  Heart,
+  Smile,
+  ShoppingBag
 };
 
 export default function CategoryFilter({ 

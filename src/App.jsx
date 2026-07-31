@@ -20,17 +20,17 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v40 for Daily Upwas menu update
-    const versionKey = 'anuprita_kitchen_v40_daily_upwas';
+    // Force reset cache version key to v42 for full 10 categories update
+    const versionKey = 'anuprita_kitchen_v42_10_categories';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v40', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v42', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v40');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v42');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
@@ -120,7 +120,7 @@ export default function App() {
     const syncFromCloud = async () => {
       setIsSyncingCloud(true);
       const cloudData = await fetchStateFromCloud();
-      if (cloudData && cloudData.items && cloudData.items.some(i => i.category === 'daily-upwas')) {
+      if (cloudData && cloudData.items && cloudData.items.some(i => i.category === 'sandwiches')) {
         setItems(cloudData.items);
         if (cloudData.todayMenu) {
           setTodayMenu(cloudData.todayMenu);

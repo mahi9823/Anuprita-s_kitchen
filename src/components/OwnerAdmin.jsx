@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, CheckCircle, Clock, TrendingUp, ShoppingBag, Package, Power, Save, PhoneCall, Sparkles, Leaf, User, Phone, MapPin, Trash2, Lock, Coffee, Sun, Moon, MessageSquare, Check, AlertCircle, Utensils, IndianRupee, CheckCircle2, XCircle, Calendar, DollarSign, Camera, Image as ImageIcon, Smartphone, Users, Cloud, CheckCircle2 as CloudCheck, Flame, Dumbbell, Navigation, Map } from 'lucide-react';
 import { pushStateToCloud } from '../services/cloudSync';
+import { INITIAL_CATEGORIES } from '../data/foodData';
 
 const PRESET_APP_PHOTOS = [
   { label: 'गरमागरम आलू पराठा (Aloo Paratha)', url: '/images/aloo_paratha.jpg' },
@@ -1121,7 +1122,11 @@ export default function OwnerAdmin({
                 <div className="form-group">
                   <label className="form-label">{lang === 'en' ? 'Category' : 'वर्ग (Category)'}</label>
                   <select className="form-select" value={newCategory} onChange={(e) => setNewCategory(e.target.value)}>
-                    <option value="daily-upwas">दैनिक उपवास (Daily Upwas)</option>
+                    {INITIAL_CATEGORIES.filter(c => c.id !== 'all').map(c => (
+                      <option key={c.id} value={c.id}>
+                        {lang === 'en' ? c.nameEn : c.nameMr}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
