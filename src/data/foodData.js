@@ -1,5 +1,4 @@
 export const INITIAL_CATEGORIES = [
-  { id: 'all', nameMr: 'सर्व मेनू', nameEn: 'All Services', icon: 'Utensils' },
   { id: 'daily-upwas', nameMr: '१. दैनिक उपवास', nameEn: 'Daily Upwas', icon: 'Flame' },
   { id: 'sweets', nameMr: '२. गोड पदार्थ', nameEn: 'Sweets', icon: 'Cake' },
   { id: 'customized-orders', nameMr: '३. खास कॅटरिंग ऑर्डर्स', nameEn: 'Customized Orders', icon: 'Users' },

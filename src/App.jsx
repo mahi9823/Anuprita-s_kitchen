@@ -20,17 +20,17 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v42 for full 10 categories update
-    const versionKey = 'anuprita_kitchen_v42_10_categories';
+    // Force reset cache version key to v44 for removing All Services tab & default to Daily Upwas
+    const versionKey = 'anuprita_kitchen_v44_no_all_tab';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v42', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v44', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v42');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v44');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
@@ -93,7 +93,7 @@ export default function App() {
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
   // Default Owner WhatsApp Mobile Number set to 7507969291
   const [whatsappNumber, setWhatsappNumber] = useState('7507969291');
-  const [selectedCat, setSelectedCat] = useState('all');
+  const [selectedCat, setSelectedCat] = useState('daily-upwas');
   const [vegFilter, setVegFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('menu');
@@ -419,19 +419,9 @@ export default function App() {
       if (!matchTitleMr && !matchTitleEn && !matchDesc) return false;
     }
 
-    // Upvas items should appear ONLY in the Fasting Only category (or when upvas filter tag is selected)
-    const isUpvasItem = item.category === 'upvas' || item.isUpvas === true;
-    if (isUpvasItem && selectedCat !== 'upvas' && vegFilter !== 'upvas' && !searchQuery) {
-      return false;
-    }
-
     // Category filter
-    if (selectedCat !== 'all') {
-      if (selectedCat === 'bulk') {
-        if (!item.isBestseller) return false;
-      } else if (selectedCat === 'upvas') {
-        if (!isUpvasItem) return false;
-      } else if (item.category !== selectedCat) {
+    if (selectedCat) {
+      if (item.category !== selectedCat) {
         return false;
       }
     }
