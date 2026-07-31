@@ -20,32 +20,30 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v39 for Aloo Paratha menu addition
-    const versionKey = 'anuprita_kitchen_v39_aloo_paratha';
+    // Force reset cache version key to v40 for Daily Upwas menu update
+    const versionKey = 'anuprita_kitchen_v40_daily_upwas';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v39', JSON.stringify(INITIAL_ITEMS));
-      pushStateToCloud(INITIAL_ITEMS, todayMenu);
+      localStorage.setItem('anuprita_kitchen_items_v40', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v39');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v40');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
   const [todayMenu, setTodayMenu] = useState(() => {
-    const todayKey = 'anuprita_today_menu_v38_no_dinner';
+    const todayKey = 'anuprita_today_menu_v40_upwas';
     const newMenu = {
-      breakfast: 'कांदा पोहे व कोथिंबीर वडी (Kanda Pohe & Kothimbir Vadi)',
-      lunch: 'विशेष पुरणपोळी थाळी - २ पुरणपोळी, कटाची आमटी, बटाटा भाजी, भात व भजी'
+      breakfast: 'साबूदाणा खिचडी व साबूदाणा वाडा (Sabudana Khichdi & Vada)',
+      lunch: 'उपवास थालीपीठ, भगर व शेंगदाणा आमटी (Upwas Thalipeeth & Bhagar)'
     };
 
     if (!localStorage.getItem(todayKey)) {
       localStorage.setItem(todayKey, 'true');
       localStorage.setItem('anuprita_kitchen_today_menu', JSON.stringify(newMenu));
-      pushStateToCloud(INITIAL_ITEMS, newMenu);
       return newMenu;
     }
     const saved = localStorage.getItem('anuprita_kitchen_today_menu');
@@ -122,14 +120,14 @@ export default function App() {
     const syncFromCloud = async () => {
       setIsSyncingCloud(true);
       const cloudData = await fetchStateFromCloud();
-      if (cloudData && cloudData.items && cloudData.items.length > 0) {
+      if (cloudData && cloudData.items && cloudData.items.some(i => i.category === 'daily-upwas')) {
         setItems(cloudData.items);
         if (cloudData.todayMenu) {
           setTodayMenu(cloudData.todayMenu);
         }
         setLastCloudSyncTime(new Date().toLocaleTimeString());
       } else {
-        // Seed cloud database with latest menu including stepper add-ons!
+        // Seed cloud database with latest menu
         pushStateToCloud(INITIAL_ITEMS, todayMenu);
       }
       setIsSyncingCloud(false);

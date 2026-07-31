@@ -47,7 +47,7 @@ export default function OwnerAdmin({
   // New Item State
   const [newTitleMr, setNewTitleMr] = useState('');
   const [newTitleEn, setNewTitleEn] = useState('');
-  const [newCategory, setNewCategory] = useState('thali');
+  const [newCategory, setNewCategory] = useState('daily-upwas');
   const [newPrice, setNewPrice] = useState('');
   const [newUnit, setNewUnit] = useState('थाळी (Plate)');
   const [newAdvanceDays, setNewAdvanceDays] = useState('1'); 
@@ -1121,10 +1121,7 @@ export default function OwnerAdmin({
                 <div className="form-group">
                   <label className="form-label">{lang === 'en' ? 'Category' : 'वर्ग (Category)'}</label>
                   <select className="form-select" value={newCategory} onChange={(e) => setNewCategory(e.target.value)}>
-                    <option value="thali">थाळी (Thali)</option>
-                    <option value="snacks">नाश्ता (Snacks)</option>
-                    <option value="sweets">गोड पदार्थ (Sweets)</option>
-                    <option value="upvas">उपवास (Upvas)</option>
+                    <option value="daily-upwas">दैनिक उपवास (Daily Upwas)</option>
                   </select>
                 </div>
 
