@@ -20,17 +20,17 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v44 for removing All Services tab & default to Daily Upwas
-    const versionKey = 'anuprita_kitchen_v44_no_all_tab';
+    // Force reset cache version key to v45 for updated sweets images & remove Upwas Dahi Vada
+    const versionKey = 'anuprita_kitchen_v45_sweets_images_fix';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v44', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v45', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v44');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v45');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
