@@ -20,17 +20,17 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v45 for updated sweets images & remove Upwas Dahi Vada
-    const versionKey = 'anuprita_kitchen_v45_sweets_images_fix';
+    // Force reset cache version key to v46 for reordering Maharashtrian before North Indian & removing Kulcha/Tandoori Roti/Garlic Naan
+    const versionKey = 'anuprita_kitchen_v46_maharashtrian_first';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v45', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v46', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v45');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v46');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
