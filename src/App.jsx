@@ -20,25 +20,25 @@ import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v46 for reordering Maharashtrian before North Indian & removing Kulcha/Tandoori Roti/Garlic Naan
-    const versionKey = 'anuprita_kitchen_v46_maharashtrian_first';
+    // Force reset cache version key to v50 for updating menu items as requested by user
+    const versionKey = 'anuprita_kitchen_v50_user_requested_menu';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v46', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v50', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v46');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v50');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
   const [todayMenu, setTodayMenu] = useState(() => {
-    const todayKey = 'anuprita_today_menu_v40_upwas';
+    const todayKey = 'anuprita_today_menu_v50_user_requested';
     const newMenu = {
-      breakfast: 'साबूदाणा खिचडी व साबूदाणा वाडा (Sabudana Khichdi & Vada)',
-      lunch: 'उपवास थालीपीठ, भगर व शेंगदाणा आमटी (Upwas Thalipeeth & Bhagar)'
+      breakfast: 'गरमागरम पोहे, उपमा व वाडा पाव (Poha, Upma & Wada Pav)',
+      lunch: 'पाव भाजी, पनीर बटर मसाला, पुरणपोळी व मसाले भात (Pav Bhaji, Paneer Butter Masala & Puran Poli)'
     };
 
     if (!localStorage.getItem(todayKey)) {
@@ -93,7 +93,7 @@ export default function App() {
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
   // Default Owner WhatsApp Mobile Number set to 7507969291
   const [whatsappNumber, setWhatsappNumber] = useState('7507969291');
-  const [selectedCat, setSelectedCat] = useState('daily-upwas');
+  const [selectedCat, setSelectedCat] = useState('main-course');
   const [vegFilter, setVegFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('menu');
@@ -120,7 +120,7 @@ export default function App() {
     const syncFromCloud = async () => {
       setIsSyncingCloud(true);
       const cloudData = await fetchStateFromCloud();
-      if (cloudData && cloudData.items && cloudData.items.some(i => i.category === 'sandwiches')) {
+      if (cloudData && cloudData.items && cloudData.items.some(i => i.id === 'item-pav-bhaji')) {
         setItems(cloudData.items);
         if (cloudData.todayMenu) {
           setTodayMenu(cloudData.todayMenu);
