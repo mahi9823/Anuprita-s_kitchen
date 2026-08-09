@@ -12,6 +12,7 @@ import CustomerOrdersModal from './components/CustomerOrdersModal';
 import OwnerPinModal from './components/OwnerPinModal';
 import TiffinPlans from './components/TiffinPlans';
 import AppInstallBanner from './components/AppInstallBanner';
+import KitchenLiveStatus from './components/KitchenLiveStatus';
 import { INITIAL_ITEMS } from './data/foodData';
 import { pushStateToCloud, fetchStateFromCloud } from './services/cloudSync';
 import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck } from 'lucide-react';
@@ -504,6 +505,9 @@ export default function App() {
             onTriggerInstall={handleTriggerInstall}
             installCount={installCount}
           />
+
+          {/* 6 AM Live Kitchen Preparation Status Banner */}
+          <KitchenLiveStatus lang={lang} />
 
           {/* Category Filter Pills */}
           <CategoryFilter
