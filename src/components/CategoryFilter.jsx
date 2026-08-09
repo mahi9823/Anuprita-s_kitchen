@@ -41,16 +41,6 @@ export default function CategoryFilter({
             </button>
           );
         })}
-
-        {/* Upvas Fasting Tag Toggle Button inline with category pills */}
-        <button
-          className={`pill-item ${vegFilter === 'upvas' ? 'active' : ''}`}
-          style={vegFilter === 'upvas' ? {} : { background: '#fef3c7', color: '#92400e', borderColor: '#fde68a' }}
-          onClick={() => setVegFilter(vegFilter === 'upvas' ? 'all' : 'upvas')}
-        >
-          <Flame size={13} color={vegFilter === 'upvas' ? 'white' : '#b45309'} />
-          <span>{lang === 'mr' ? 'उपवास खास' : 'Fasting Only'}</span>
-        </button>
       </div>
     </div>
   );

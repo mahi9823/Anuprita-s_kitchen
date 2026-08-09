@@ -1,7 +1,7 @@
 export const INITIAL_CATEGORIES = [
   { id: 'main-course', nameMr: '१. मुख्य मेन्यू', nameEn: 'Main Course', icon: 'Utensils' },
   { id: 'snacks', nameMr: '२. खमंग नाश्ता', nameEn: 'Snacks', icon: 'Coffee' },
-  { id: 'daily-upwas', nameMr: '३. दैनिक उपवास', nameEn: 'Daily Upwas', icon: 'Flame' },
+  { id: 'daily-upwas', nameMr: '३. उपवास', nameEn: 'Upwas', icon: 'Flame' },
   { id: 'sweets', nameMr: '४. गोड पदार्थ', nameEn: 'Sweets', icon: 'Cake' }
 ];
 

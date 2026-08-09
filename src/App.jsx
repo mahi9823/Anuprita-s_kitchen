@@ -11,7 +11,6 @@ import CustomerAuthModal from './components/CustomerAuthModal';
 import CustomerOrdersModal from './components/CustomerOrdersModal';
 import OwnerPinModal from './components/OwnerPinModal';
 import TiffinPlans from './components/TiffinPlans';
-import TodaySpecialMenu from './components/TodaySpecialMenu';
 import AppInstallBanner from './components/AppInstallBanner';
 import { INITIAL_ITEMS } from './data/foodData';
 import { pushStateToCloud, fetchStateFromCloud } from './services/cloudSync';
@@ -505,9 +504,6 @@ export default function App() {
             onTriggerInstall={handleTriggerInstall}
             installCount={installCount}
           />
-
-          {/* Today's Special Menu Showcase Card */}
-          <TodaySpecialMenu todayMenu={todayMenu} lang={lang} />
 
           {/* Category Filter Pills */}
           <CategoryFilter
