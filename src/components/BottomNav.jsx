@@ -1,5 +1,5 @@
 import React from 'react';
-import { Utensils, Calculator, ShoppingBag, MessageSquare } from 'lucide-react';
+import { Utensils, Calendar, ShoppingBag, MessageSquare } from 'lucide-react';
 
 export default function BottomNav({ activeTab, setActiveTab, cartCount, lang, isOwnerMode, whatsappNumber = '7507969291' }) {
   const handleChatWithOwner = () => {
@@ -26,8 +26,8 @@ export default function BottomNav({ activeTab, setActiveTab, cartCount, lang, is
         className={`nav-item ${activeTab === 'catering' && !isOwnerMode ? 'active' : ''}`}
         onClick={() => setActiveTab('catering')}
       >
-        <Calculator size={20} />
-        <span>{lang === 'mr' ? 'कॅटरिंग मोजणी' : 'Catering Calc'}</span>
+        <Calendar size={20} />
+        <span>{lang === 'mr' ? 'इव्हेंट ऑर्डर' : 'Event Order'}</span>
       </button>
 
       <button 

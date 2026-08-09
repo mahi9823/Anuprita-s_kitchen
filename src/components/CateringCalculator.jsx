@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Users, Calculator, Send, CheckCircle2, Sparkles, Leaf } from 'lucide-react';
+import { Users, Calendar, Send, CheckCircle2, Sparkles, Leaf } from 'lucide-react';
 import { CATERING_PACKAGES } from '../data/foodData';
 
 export default function CateringCalculator({ lang, whatsappNumber }) {
   const [guestCount, setGuestCount] = useState(30);
-  const [eventType, setEventType] = useState('satyanarayan');
+  const [eventType, setEventType] = useState('Satyanarayan Puja');
   const [selectedDessert, setSelectedDessert] = useState('modak');
   const [selectedMain, setSelectedMain] = useState('veg_thali');
 
@@ -40,21 +40,21 @@ export default function CateringCalculator({ lang, whatsappNumber }) {
   const est = calculateEstimate();
 
   const handleSendWhatsAppEstimate = () => {
-    const textMr = `नमस्ते अनुप्रिता ताई! मला *Anuprita's Kitchen* च्या शाकाहारी कॅटरिंग ऑर्डरची चौकशी करायची आहे:%0A%0A` +
-      `📌 *कार्यक्रम:* ${eventType}%0A` +
+    const textMr = `नमस्ते अनुप्रिता ताई! मला *Anuprita's Kitchen* च्या *इव्हेंट ऑर्डर* बाबत चौकशी करायची आहे:%0A%0A` +
+      `📌 *इव्हेंट प्रकार:* ${eventType}%0A` +
       `👥 *पाहुणे (Guests):* ${guestCount} जण%0A` +
       `🍲 *मुख्य जेवण:* ${selectedMain}%0A` +
       `🍨 *गोड पदार्थ:* ${selectedDessert}%0A` +
       `💰 *अंदाजे एकूण खर्च:* ₹${est.totalCost} (अंदाजे ₹${est.ratePerHead}/व्यक्ति)%0A%0A` +
-      `कृपया माझ्यासाठी कोटेशन व वेळ कन्फर्म करा. धन्यवाद!`;
+      `कृपया माझ्या इव्हेंटसाठी उपलब्धता व कोटेशन कन्फर्म करा. धन्यवाद!`;
 
-    const textEn = `Hello Anuprita! I would like to inquire about pure veg bulk catering for my event:%0A%0A` +
-      `📌 *Event:* ${eventType}%0A` +
+    const textEn = `Hello Anuprita! I would like to inquire about an *Event Order* for my event:%0A%0A` +
+      `📌 *Event Type:* ${eventType}%0A` +
       `👥 *Guests:* ${guestCount}%0A` +
       `🍲 *Main Course:* ${selectedMain}%0A` +
       `🍨 *Dessert:* ${selectedDessert}%0A` +
       `💰 *Est Total:* ₹${est.totalCost} (Approx ₹${est.ratePerHead}/head)%0A%0A` +
-      `Please confirm availability & quotation. Thank you!`;
+      `Please confirm availability & quotation for my event order. Thank you!`;
 
     const message = lang === 'en' ? textEn : textMr;
     const targetPhone = whatsappNumber.replace(/\D/g, '');
@@ -67,15 +67,15 @@ export default function CateringCalculator({ lang, whatsappNumber }) {
       <div className="welcome-banner">
         <span className="welcome-badge">
           <Sparkles size={12} style={{ display: 'inline', marginRight: '4px' }} />
-          {lang === 'en' ? '100% Pure Veg Catering Calculator' : '१००% शुद्ध शाकाहारी कॅटरिंग मोजणी'}
+          {lang === 'en' ? '100% Pure Veg Event Order Booking' : '१००% शुद्ध शाकाहारी इव्हेंट ऑर्डर'}
         </span>
         <h2 className="welcome-title">
-          {lang === 'en' ? "Anuprita's Kitchen Budget Estimator" : "Anuprita's Kitchen कॅटरिंग बजेट मोजणी"}
+          {lang === 'en' ? "Anuprita's Kitchen Event Order Section" : "Anuprita's Kitchen इव्हेंट ऑर्डर सोहळा"}
         </h2>
         <p className="welcome-subtitle">
           {lang === 'en' 
-            ? 'Get instant accurate estimates for food quantity in Kg/Pcs and total budget for pure veg events.' 
-            : 'सत्यनारायण पूजा, लग्न किंवा घरगुती सोहळ्यासाठी शाकाहारी अन्नाचा अचूक अंदाज काढा.'}
+            ? 'Book pure veg bulk catering & food orders for Satyanarayan, Birthday, Housewarming, Marriage & special family events.' 
+            : 'सत्यनारायण पूजा, वाढदिवस, वास्तूशांती किंवा घरगुती सोहळ्यासाठी इव्हेंट ऑर्डर व कॅटरिंग सोप्या पद्धतीने बुक करा.'}
         </p>
       </div>
 
@@ -123,13 +123,24 @@ export default function CateringCalculator({ lang, whatsappNumber }) {
         </div>
       </div>
 
-      {/* Menu options selection */}
+      {/* Event & Menu options selection */}
       <div className="calc-card" style={{ background: 'white' }}>
         <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1c1917', marginBottom: '8px' }}>
-          {lang === 'en' ? 'Select Veg Catering Options:' : 'शाकाहारी मेनू निवड (Veg Options):'}
+          {lang === 'en' ? 'Select Event & Catering Options:' : 'इव्हेंट प्रकार व मेनू निवड:'}
         </h3>
 
         <div className="form-group">
+          <label className="form-label">{lang === 'en' ? 'Event Type:' : 'इव्हент प्रकार (Event Type):'}</label>
+          <select className="form-select" value={eventType} onChange={(e) => setEventType(e.target.value)}>
+            <option value="Satyanarayan Puja">{lang === 'en' ? 'Satyanarayan Puja & Feast' : 'श्री सत्यनारायण महापूजा व मेजवानी'}</option>
+            <option value="Birthday Party">{lang === 'en' ? 'Birthday Party / Celebration' : 'वाढदिवस सोहळा'}</option>
+            <option value="Housewarming / Vastushanti">{lang === 'en' ? 'Housewarming / Vastu Shanti' : 'वास्तूशांती / गृहप्रवेश सोहळा'}</option>
+            <option value="Family Function">{lang === 'en' ? 'Family Function / Get-Together' : 'कौटुंबिक कार्य / स्नेहसंमेलन'}</option>
+            <option value="Marriage / Engagement">{lang === 'en' ? 'Marriage / Engagement Function' : 'लग्न / साखरपुडा सोहळा'}</option>
+          </select>
+        </div>
+
+        <div className="form-group" style={{ marginTop: '8px' }}>
           <label className="form-label">{lang === 'en' ? 'Main Course:' : 'मुख्य जेवण (Main Veg Dishes):'}</label>
           <select className="form-select" value={selectedMain} onChange={(e) => setSelectedMain(e.target.value)}>
             <option value="veg_thali">{lang === 'en' ? 'Shahi Veg Feast Thali' : 'शाही शाकाहारी मेजवानी थाळी'}</option>
@@ -151,8 +162,8 @@ export default function CateringCalculator({ lang, whatsappNumber }) {
       {/* Estimation display */}
       <div style={{ background: '#fff7ed', border: '1.5px solid #fed7aa', borderRadius: '16px', padding: '16px' }}>
         <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#9a3412', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Calculator size={18} color="#ea580c" />
-          <span>{lang === 'en' ? 'Estimated Requirement Summary:' : 'अन्नधान्य व खर्चाचा अंदाज:'}</span>
+          <Calendar size={18} color="#ea580c" />
+          <span>{lang === 'en' ? 'Estimated Requirement Summary:' : 'इव्हेंट मोजणी व खर्चाचा अंदाज:'}</span>
         </h3>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '12px' }}>
@@ -199,13 +210,13 @@ export default function CateringCalculator({ lang, whatsappNumber }) {
           style={{ width: '100%', marginTop: '16px' }}
         >
           <Send size={18} />
-          <span>{lang === 'en' ? 'Send Inquiry to Anuprita via WhatsApp' : 'अनुप्रिता ताईंना व्हॉट्सॲपवर पाठवा'}</span>
+          <span>{lang === 'en' ? 'Book Event Order via WhatsApp' : 'इव्हेंट ऑर्डर व्हॉट्सॲपवर बुक करा'}</span>
         </button>
       </div>
 
       {/* Pre-packaged catering deals */}
       <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1c1917', marginTop: '8px' }}>
-        {lang === 'en' ? 'Pure Veg Catering Packages' : 'शाकाहारी रेडीमेड कॅटरिंग पॅकेजेस'}
+        {lang === 'en' ? 'Pure Veg Event Catering Packages' : 'शाकाहारी रेडीमेड इव्हेंट पॅकेजेस'}
       </h3>
 
       {CATERING_PACKAGES.map((pkg) => (
