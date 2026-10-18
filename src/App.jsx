@@ -13,7 +13,7 @@ import OwnerPinModal from './components/OwnerPinModal';
 import TiffinPlans from './components/TiffinPlans';
 import AppInstallBanner from './components/AppInstallBanner';
 import { INITIAL_ITEMS } from './data/foodData';
-import { pushStateToCloud, fetchStateFromCloud } from './services/cloudSync';
+import { fetchMenuItems, saveMenuItems } from './services/menuDatabase';
 import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck } from 'lucide-react';
 
 export default function App() {
@@ -114,39 +114,43 @@ export default function App() {
     return () => clearTimeout(splashTimer);
   }, []);
 
-  // AUTOMATIC CLOUD SYNC: Auto-pull latest menu & prices from Cloud database every 5 minutes (300,000 ms) + on app focus!
+  // AUTOMATIC SUPABASE MENU SYNC: read the shared menu without overwriting it with defaults.
   useEffect(() => {
-    const syncFromCloud = async () => {
-      setIsSyncingCloud(true);
-      const cloudData = await fetchStateFromCloud();
-      if (cloudData && cloudData.items && cloudData.items.some(i => i.id === 'item-pav-bhaji')) {
-        setItems(cloudData.items);
-        if (cloudData.todayMenu) {
-          setTodayMenu(cloudData.todayMenu);
+    let isActive = true;
+    let isSyncing = false;
+
+    const syncFromSupabase = async () => {
+      if (isSyncing) return;
+      isSyncing = true;
+      if (isActive) setIsSyncingCloud(true);
+
+      try {
+        const cloudItems = await fetchMenuItems();
+        if (!isActive) return;
+
+        if (Array.isArray(cloudItems) && cloudItems.length > 0) {
+          setItems(cloudItems);
+          localStorage.setItem('anuprita_kitchen_items_v50', JSON.stringify(cloudItems));
+          setLastCloudSyncTime(new Date().toLocaleTimeString());
+          console.log('[Supabase] Menu synced:', cloudItems.length);
+        } else {
+          console.warn('[Supabase] Menu is empty; keeping the local menu.');
         }
-        setLastCloudSyncTime(new Date().toLocaleTimeString());
-      } else {
-        // Seed cloud database with latest menu
-        pushStateToCloud(INITIAL_ITEMS, todayMenu);
+      } catch (error) {
+        console.error('[Supabase] Menu sync failed:', error);
+      } finally {
+        isSyncing = false;
+        if (isActive) setIsSyncingCloud(false);
       }
-      setIsSyncingCloud(false);
     };
 
-    // Initial fetch & push latest menu to Cloud
-    pushStateToCloud(INITIAL_ITEMS, todayMenu);
-    syncFromCloud();
-
-    // Auto-sync every 2 minutes (2 * 60 * 1000 = 120000 ms)
-    const TWO_MINUTES = 2 * 60 * 1000;
-    const intervalId = setInterval(syncFromCloud, TWO_MINUTES);
-
-    // Instant auto-sync whenever customer re-opens or focuses the app tab
-    const handleFocus = () => {
-      syncFromCloud();
-    };
+    syncFromSupabase();
+    const intervalId = setInterval(syncFromSupabase, 2 * 60 * 1000);
+    const handleFocus = () => syncFromSupabase();
     window.addEventListener('focus', handleFocus);
 
     return () => {
+      isActive = false;
       clearInterval(intervalId);
       window.removeEventListener('focus', handleFocus);
     };
@@ -253,21 +257,29 @@ export default function App() {
     return () => window.removeEventListener('appinstalled', handleAppInstalled);
   }, []);
 
-  // Helper to commit state locally & upload to Cloud Database immediately!
-  const commitAndPushState = (newItems, newTodayMenu) => {
+  // Save owner menu changes locally and to Supabase.
+  const commitAndPushState = async (newItems, newTodayMenu) => {
     const itemsToSave = newItems !== undefined ? newItems : items;
     const todayMenuToSave = newTodayMenu !== undefined ? newTodayMenu : todayMenu;
 
     setItems(itemsToSave);
     setTodayMenu(todayMenuToSave);
 
-    localStorage.setItem('anuprita_kitchen_items_v35', JSON.stringify(itemsToSave));
+    localStorage.setItem('anuprita_kitchen_items_v50', JSON.stringify(itemsToSave));
     localStorage.setItem('anuprita_kitchen_today_menu', JSON.stringify(todayMenuToSave));
 
-    // Upload to Cloud Database so all customer devices receive the update immediately!
-    pushStateToCloud(itemsToSave, todayMenuToSave).then(() => {
+    try {
+      if (!isOwnerAuthenticated) {
+        console.warn('[Supabase] Owner is not authenticated; menu changes were saved locally only.');
+        return;
+      }
+      await saveMenuItems(itemsToSave);
       setLastCloudSyncTime(new Date().toLocaleTimeString());
-    });
+      console.log('[Supabase] Menu saved:', itemsToSave.length);
+    } catch (error) {
+      console.error('[Supabase] Failed to save menu changes:', error);
+      window.alert('Menu cloud save failed. Please check owner login and Supabase permissions, then try again.');
+    }
   };
 
   useEffect(() => {
@@ -290,18 +302,24 @@ export default function App() {
     }
   }, [currentUser]);
 
-  // Force hard refresh app cache function for mobile devices
+  // Manually refresh the menu from Supabase without replacing it with defaults on errors.
   const handleForceRefreshMenu = async () => {
     setIsSyncingCloud(true);
-    const cloudData = await fetchStateFromCloud();
-    if (cloudData && cloudData.items) {
-      setItems(cloudData.items);
-      if (cloudData.todayMenu) setTodayMenu(cloudData.todayMenu);
-      setLastCloudSyncTime(new Date().toLocaleTimeString());
-    } else {
-      setItems(INITIAL_ITEMS);
+    try {
+      const cloudItems = await fetchMenuItems();
+      if (Array.isArray(cloudItems) && cloudItems.length > 0) {
+        setItems(cloudItems);
+        localStorage.setItem('anuprita_kitchen_items_v50', JSON.stringify(cloudItems));
+        setLastCloudSyncTime(new Date().toLocaleTimeString());
+      } else {
+        console.warn('[Supabase] No menu items returned; existing menu was kept.');
+      }
+    } catch (error) {
+      console.error('[Supabase] Manual menu refresh failed:', error);
+      window.alert('Menu refresh failed. Check your internet connection and Supabase settings.');
+    } finally {
+      setIsSyncingCloud(false);
     }
-    setIsSyncingCloud(false);
   };
 
   // Cart quantity update handler supporting custom add-ons
@@ -354,6 +372,10 @@ export default function App() {
     commitAndPushState(items, newMenu);
   };
 
+  const handleUpdateItems = (updatedItems) => {
+    commitAndPushState(updatedItems, todayMenu);
+  };
+
   const handleOrderPlaced = (orderData) => {
     setOrdersList((prev) => [orderData, ...prev]);
     setCartItems({});
@@ -394,7 +416,12 @@ export default function App() {
     }
   };
 
-  const handleOwnerPinSuccess = () => {
+  const handleOwnerPinSuccess = (ownerUser) => {
+    if (!ownerUser?.id) {
+      console.error('Supabase owner authentication failed.');
+      return;
+    }
+
     setIsOwnerAuthenticated(true);
     setShowOwnerPinModal(false);
     setIsOwnerMode(true);
@@ -485,6 +512,7 @@ export default function App() {
           onLockOwner={handleLockOwner}
           todayMenu={todayMenu}
           onUpdateTodayMenu={handleUpdateTodayMenu}
+          onUpdateItems={handleUpdateItems}
           installCount={installCount}
           visitorCount={visitorCount}
           signupCount={signupCount}

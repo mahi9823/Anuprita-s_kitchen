@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, CheckCircle, Clock, TrendingUp, ShoppingBag, Package, Power, Save, PhoneCall, Sparkles, Leaf, User, Phone, MapPin, Trash2, Lock, Coffee, Sun, Moon, MessageSquare, Check, AlertCircle, Utensils, IndianRupee, CheckCircle2, XCircle, Calendar, DollarSign, Camera, Image as ImageIcon, Smartphone, Users, Cloud, CheckCircle2 as CloudCheck, Flame, Dumbbell, Navigation, Map } from 'lucide-react';
-import { pushStateToCloud } from '../services/cloudSync';
+
 import { INITIAL_CATEGORIES } from '../data/foodData';
 
 const PRESET_APP_PHOTOS = [
@@ -34,6 +34,7 @@ export default function OwnerAdmin({
   onLockOwner,
   todayMenu,
   onUpdateTodayMenu,
+  onUpdateItems,
   installCount = 18,
   visitorCount = 142
 }) {
@@ -151,7 +152,6 @@ export default function OwnerAdmin({
       updatedAt: new Date().toLocaleTimeString()
     };
     onUpdateTodayMenu(updated);
-    pushStateToCloud(items, updated);
     triggerSyncAlert(lang === 'en' ? "Today's menu saved & broadcasted to all customer phones!" : "आजचा खास मेनू बदलला! सर्व ग्राहकांच्या मोबाईलवर अपडेट झाला.");
   };
 
@@ -164,7 +164,7 @@ export default function OwnerAdmin({
       return i;
     });
     setEditingThaliId(null);
-    pushStateToCloud(updatedItems, todayMenu);
+    if (onUpdateItems) onUpdateItems(updatedItems);
     triggerSyncAlert(lang === 'en' ? 'Thali Menu Updated & Broadcasted!' : 'थळीतील घटक बदलले! सर्व मोबाईलमध्ये अपडेट झाले.');
   };
 
@@ -265,7 +265,7 @@ export default function OwnerAdmin({
   const handleChangeItemPhoto = (itemId, photoUrl) => {
     const updatedItems = items.map(i => i.id === itemId ? { ...i, image: photoUrl } : i);
     setEditingPhotoId(null);
-    pushStateToCloud(updatedItems, todayMenu);
+    if (onUpdateItems) onUpdateItems(updatedItems);
     triggerSyncAlert(lang === 'en' ? 'Photo updated & broadcasted to all customer apps!' : 'फोटो बदलला! सर्व ग्राहकांच्या मोबाईलवर नवीन फोटो दिसेल.');
   };
 
@@ -321,7 +321,6 @@ export default function OwnerAdmin({
     if (editPriceVal) {
       onUpdatePrice(id, parseFloat(editPriceVal));
       const updatedItems = items.map(i => i.id === id ? { ...i, price: parseFloat(editPriceVal) } : i);
-      pushStateToCloud(updatedItems, todayMenu);
       triggerSyncAlert(lang === 'en' ? 'Price updated & broadcasted to all devices!' : 'किंमत बदलली! सर्व मोबाईलवर नवीन किंमत १ सेकंदात अपडेट झाली.');
     }
     setEditingId(null);
@@ -331,7 +330,6 @@ export default function OwnerAdmin({
     if (window.confirm(lang === 'en' ? `Are you sure you want to remove "${name}"?` : `तुम्हाला नक्की "${name}" हा पदार्थ काढून टाकायचा आहे का?`)) {
       onRemoveItem(id);
       const updatedItems = items.filter(i => i.id !== id);
-      pushStateToCloud(updatedItems, todayMenu);
       triggerSyncAlert(lang === 'en' ? 'Item removed from all customer apps!' : 'पदार्थ काढून टाकला! सर्व मोबाईलवरून लगेच निघून गेला.');
     }
   };
@@ -917,8 +915,7 @@ export default function OwnerAdmin({
                   onClick={() => {
                     onToggleStock(item.id);
                     const updatedItems = items.map(i => i.id === item.id ? { ...i, inStock: !i.inStock } : i);
-                    pushStateToCloud(updatedItems, todayMenu);
-                    triggerSyncAlert(lang === 'en' ? 'Stock status updated & broadcasted!' : 'उपलब्धता बदलली! सर्व मोबाईलवर अपडेट झाली.');
+                                  triggerSyncAlert(lang === 'en' ? 'Stock status updated & broadcasted!' : 'उपलब्धता बदलली! सर्व मोबाईलवर अपडेट झाली.');
                   }}
                   style={{
                     padding: '6px 10px',

@@ -81,7 +81,7 @@ body {
 .header-bar {
   background: linear-gradient(135deg, #1c1917 0%, #292524 100%);
   color: white;
-  padding: 10px 12px;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 12px 10px;
   position: sticky;
   top: 0;
   z-index: 40;
