@@ -14,22 +14,23 @@ import TiffinPlans from './components/TiffinPlans';
 import AppInstallBanner from './components/AppInstallBanner';
 import { INITIAL_ITEMS } from './data/foodData';
 import { fetchMenuItems, saveMenuItems } from './services/menuDatabase';
-import { Sparkles, Leaf, AlertCircle, Calendar, Code, RefreshCw, Zap, CloudCheck } from 'lucide-react';
+import { recordUserLogin, trackDeviceFirstOpen } from './services/userService';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [items, setItems] = useState(() => {
-    // Force reset cache version key to v50 for updating menu items as requested by user
-    const versionKey = 'anuprita_kitchen_v50_user_requested_menu';
+    // Force reset cache version key to v51 for updating menu items as requested by user
+    const versionKey = 'anuprita_kitchen_v51_user_requested_menu';
     const hasSynced = localStorage.getItem(versionKey);
     
     if (!hasSynced) {
       localStorage.setItem(versionKey, 'true');
-      localStorage.setItem('anuprita_kitchen_items_v50', JSON.stringify(INITIAL_ITEMS));
+      localStorage.setItem('anuprita_kitchen_items_v51', JSON.stringify(INITIAL_ITEMS));
       return INITIAL_ITEMS;
     }
 
-    const saved = localStorage.getItem('anuprita_kitchen_items_v50');
+    const saved = localStorage.getItem('anuprita_kitchen_items_v51');
     return saved ? JSON.parse(saved) : INITIAL_ITEMS;
   });
 
@@ -64,27 +65,9 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  // App Install, Visitor & OTP Signup Live Tracking State (Reset old dummy counts)
+  // App Install Live Tracking State
   const [installCount, setInstallCount] = useState(() => {
-    const resetKey = 'anuprita_reset_dummy_stats_v3';
-    if (!localStorage.getItem(resetKey)) {
-      localStorage.setItem(resetKey, 'true');
-      localStorage.setItem('anuprita_kitchen_install_count', '0');
-      localStorage.setItem('anuprita_kitchen_visitor_count', '1');
-      localStorage.setItem('anuprita_kitchen_signup_count', '0');
-      return 0;
-    }
     const saved = localStorage.getItem('anuprita_kitchen_install_count');
-    return saved ? parseInt(saved, 10) : 0;
-  });
-
-  const [visitorCount, setVisitorCount] = useState(() => {
-    const saved = localStorage.getItem('anuprita_kitchen_visitor_count');
-    return saved ? parseInt(saved, 10) : 1;
-  });
-
-  const [signupCount, setSignupCount] = useState(() => {
-    const saved = localStorage.getItem('anuprita_kitchen_signup_count');
     return saved ? parseInt(saved, 10) : 0;
   });
 
@@ -114,6 +97,13 @@ export default function App() {
     return () => clearTimeout(splashTimer);
   }, []);
 
+  // Track unique device first-open independently from customer login
+  useEffect(() => {
+    trackDeviceFirstOpen().catch((err) => {
+      console.warn('[App] Device first-open tracking notice:', err);
+    });
+  }, []);
+
   // AUTOMATIC SUPABASE MENU SYNC: read the shared menu without overwriting it with defaults.
   useEffect(() => {
     let isActive = true;
@@ -129,10 +119,13 @@ export default function App() {
         if (!isActive) return;
 
         if (Array.isArray(cloudItems) && cloudItems.length > 0) {
-          setItems(cloudItems);
-          localStorage.setItem('anuprita_kitchen_items_v50', JSON.stringify(cloudItems));
+          const cloudIds = new Set(cloudItems.map((c) => c.id));
+          const missingInitial = INITIAL_ITEMS.filter((initItem) => !cloudIds.has(initItem.id));
+          const merged = missingInitial.length > 0 ? [...cloudItems, ...missingInitial] : cloudItems;
+          setItems(merged);
+          localStorage.setItem('anuprita_kitchen_items_v51', JSON.stringify(merged));
           setLastCloudSyncTime(new Date().toLocaleTimeString());
-          console.log('[Supabase] Menu synced:', cloudItems.length);
+          console.log('[Supabase] Menu synced:', merged.length);
         } else {
           console.warn('[Supabase] Menu is empty; keeping the local menu.');
         }
@@ -221,16 +214,6 @@ export default function App() {
   // Track app installation and unique mobile visits
   useEffect(() => {
     const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    const hasTrackedVisit = sessionStorage.getItem('anuprita_visited_session');
-
-    if (!hasTrackedVisit) {
-      sessionStorage.setItem('anuprita_visited_session', 'true');
-      setVisitorCount((prev) => {
-        const updated = prev + 1;
-        localStorage.setItem('anuprita_kitchen_visitor_count', updated.toString());
-        return updated;
-      });
-    }
 
     if (isStandaloneMode) {
       const hasTrackedInstall = localStorage.getItem('anuprita_installed_device');
@@ -265,7 +248,7 @@ export default function App() {
     setItems(itemsToSave);
     setTodayMenu(todayMenuToSave);
 
-    localStorage.setItem('anuprita_kitchen_items_v50', JSON.stringify(itemsToSave));
+    localStorage.setItem('anuprita_kitchen_items_v51', JSON.stringify(itemsToSave));
     localStorage.setItem('anuprita_kitchen_today_menu', JSON.stringify(todayMenuToSave));
 
     try {
@@ -308,8 +291,11 @@ export default function App() {
     try {
       const cloudItems = await fetchMenuItems();
       if (Array.isArray(cloudItems) && cloudItems.length > 0) {
-        setItems(cloudItems);
-        localStorage.setItem('anuprita_kitchen_items_v50', JSON.stringify(cloudItems));
+        const cloudIds = new Set(cloudItems.map((c) => c.id));
+        const missingInitial = INITIAL_ITEMS.filter((initItem) => !cloudIds.has(initItem.id));
+        const merged = missingInitial.length > 0 ? [...cloudItems, ...missingInitial] : cloudItems;
+        setItems(merged);
+        localStorage.setItem('anuprita_kitchen_items_v51', JSON.stringify(merged));
         setLastCloudSyncTime(new Date().toLocaleTimeString());
       } else {
         console.warn('[Supabase] No menu items returned; existing menu was kept.');
@@ -384,21 +370,11 @@ export default function App() {
   const handleLoginSuccess = (userObj) => {
     setCurrentUser(userObj);
     setShowAuthModal(false);
-    setSignupCount((prev) => {
-      const updated = prev + 1;
-      localStorage.setItem('anuprita_kitchen_signup_count', updated.toString());
-      return updated;
+    recordUserLogin(userObj).catch((err) => {
+      console.warn('Failed to record user login:', err);
     });
   };
 
-  const handleResetStats = () => {
-    setInstallCount(0);
-    setVisitorCount(1);
-    setSignupCount(0);
-    localStorage.setItem('anuprita_kitchen_install_count', '0');
-    localStorage.setItem('anuprita_kitchen_visitor_count', '1');
-    localStorage.setItem('anuprita_kitchen_signup_count', '0');
-  };
 
   const handleLogout = () => {
     setCurrentUser(null);
@@ -426,6 +402,9 @@ export default function App() {
     setShowOwnerPinModal(false);
     setIsOwnerMode(true);
     setActiveTab('owner');
+    recordUserLogin({ id: ownerUser.id, role: 'owner' }).catch((err) => {
+      console.warn('Failed to record owner login:', err);
+    });
   };
 
   const handleLockOwner = () => {
@@ -505,18 +484,11 @@ export default function App() {
           onRemoveItem={handleRemoveItem}
           onToggleStock={handleToggleStock}
           onUpdatePrice={handleUpdatePrice}
-          ordersList={ordersList}
-          whatsappNumber={whatsappNumber}
-          setWhatsappNumber={setWhatsappNumber}
           lang={lang}
           onLockOwner={handleLockOwner}
           todayMenu={todayMenu}
           onUpdateTodayMenu={handleUpdateTodayMenu}
           onUpdateItems={handleUpdateItems}
-          installCount={installCount}
-          visitorCount={visitorCount}
-          signupCount={signupCount}
-          onResetStats={handleResetStats}
         />
       ) : activeTab === 'catering' ? (
         /* Catering Budget & Quantity Calculator View */
@@ -583,7 +555,7 @@ export default function App() {
       )}
 
       {/* Clean & Subtle Footer */}
-      <footer style={{ textAlign: 'center', padding: '12px 10px 16px 10px', color: '#a8a29e', fontSize: '0.7rem', fontWeight: 600, display: 'flex', justifyContent: 'center', gap: '12px' }}>
+      <footer className="app-footer">
         <span>{lang === 'en' ? 'Owner: Reva M. Hosing' : 'मालक: रेवा म. होसिंग'}</span>
         <span>•</span>
         <span>{lang === 'en' ? 'Dev: Mahesh U. Hosing' : 'डेव्हलपर: महेश उ. होसिंग'}</span>

@@ -9,10 +9,10 @@ export default function DishDetailModal({
   cartQty, 
   onUpdateCart 
 }) {
-  if (!item) return null;
-
   // Track quantity per add-on (e.g. { 'add-bhakri': 2, 'add-chapati': 1 })
   const [addonQuantities, setAddonQuantities] = useState({});
+
+  if (!item) return null;
 
   // 2-Day Advance Cutoff Logic calculation
   const publishedDate = item.publishedAt ? new Date(item.publishedAt).getTime() : Date.now();

@@ -1,7 +1,24 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, CheckCircle, Clock, TrendingUp, ShoppingBag, Package, Power, Save, PhoneCall, Sparkles, Leaf, User, Phone, MapPin, Trash2, Lock, Coffee, Sun, Moon, MessageSquare, Check, AlertCircle, Utensils, IndianRupee, CheckCircle2, XCircle, Calendar, DollarSign, Camera, Image as ImageIcon, Smartphone, Users, Cloud, CheckCircle2 as CloudCheck, Flame, Dumbbell, Navigation, Map } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { 
+  Plus, 
+  Edit2, 
+  Power, 
+  Save, 
+  Trash2, 
+  Lock, 
+  Utensils, 
+  Calendar, 
+  Camera, 
+  Image as ImageIcon, 
+  Users, 
+  CheckCircle2 as CloudCheck, 
+  Flame, 
+  Dumbbell, 
+  RefreshCw
+} from 'lucide-react';
 
 import { INITIAL_CATEGORIES } from '../data/foodData';
+import { fetchDashboardMetrics } from '../services/userService';
 
 const PRESET_APP_PHOTOS = [
   { label: 'गरमागरम आलू पराठा (Aloo Paratha)', url: '/images/aloo_paratha.jpg' },
@@ -18,33 +35,36 @@ const PRESET_APP_PHOTOS = [
   { label: 'साबूदाणा वडी (Sabudana Vadi)', url: '/images/sabudana_vadi_1784869227907.jpg' },
   { label: 'साबूदाणा खिचडी (Sabudana Khichdi)', url: '/images/sabudana_khichdi_1784888061331.jpg' },
   { label: 'रताळ्याचा कीस (Ratalyacha Khis)', url: '/images/ratalyacha_khis_1784888078795.jpg' },
+  { label: 'खमंग पोहे चिवडा (Pohe Chiwda)', url: '/images/pohe_chivda.jpg' },
   { label: 'अनुप्रिताज किचन ब्रँड आयकॉन', url: '/app_icon.png' }
 ];
 
 export default function OwnerAdmin({ 
   items, 
   onAddItem, 
-  onRemoveItem,
+  onRemoveItem, 
   onToggleStock, 
   onUpdatePrice, 
-  ordersList, 
-  whatsappNumber, 
-  setWhatsappNumber, 
   lang,
   onLockOwner,
-  todayMenu,
-  onUpdateTodayMenu,
-  onUpdateItems,
-  installCount = 18,
-  visitorCount = 142
+  todayMenu: _todayMenu,
+  onUpdateTodayMenu: _onUpdateTodayMenu,
+  onUpdateItems
 }) {
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showManualOrderModal, setShowManualOrderModal] = useState(false);
-  const [orderFilterTab, setOrderFilterTab] = useState('pending'); // 'pending', 'completed', or 'cancelled'
   const [editingThaliId, setEditingThaliId] = useState(null);
   const [editingThaliItems, setEditingThaliItems] = useState('');
   const [editingPhotoId, setEditingPhotoId] = useState(null);
   const [syncMessage, setSyncMessage] = useState('');
+
+  // Dashboard Live Metrics State (Supabase)
+  const [metrics, setMetrics] = useState({
+    firstOpenDevices: null,
+    totalRegisteredCustomers: null,
+    uniqueCustomersLoggedIn: null
+  });
+  const [metricsLoading, setMetricsLoading] = useState(true);
+  const [metricsError, setMetricsError] = useState(null);
 
   // New Item State
   const [newTitleMr, setNewTitleMr] = useState('');
@@ -59,18 +79,6 @@ export default function OwnerAdmin({
   const [newThaliMenuMr, setNewThaliMenuMr] = useState('ताजे घरगुती शाकाहारी साहित्य');
   const [newImage, setNewImage] = useState('/images/shev_bhaji_thali_1784915706656.jpg');
 
-  // Manual Order State
-  const [custName, setCustName] = useState('');
-  const [custPhone, setCustPhone] = useState('');
-  const [custAddress, setCustAddress] = useState('');
-  const [orderDetails, setOrderDetails] = useState('');
-  const [orderAmount, setOrderAmount] = useState('');
-
-  // Daily menu editor state
-  const [breakfastVal, setBreakfastVal] = useState(todayMenu?.breakfast || 'भाजणीचे थालीपीठ, इ़डली सांबार व वाडा पाव');
-  const [lunchVal, setLunchVal] = useState(todayMenu?.lunch || 'खानदेशी शेव भाजी + बाजरी भाकरी थाळी');
-  const [dinnerVal, setDinnerVal] = useState(todayMenu?.dinner || 'बेसन पिठलं + शेव भाजी + ज्वारी भाकरी');
-
   // Edit price inline
   const [editingId, setEditingId] = useState(null);
   const [editPriceVal, setEditPriceVal] = useState('');
@@ -81,79 +89,42 @@ export default function OwnerAdmin({
     setTimeout(() => setSyncMessage(''), 4000);
   };
 
-  // Helper to open Google Maps turn-by-turn navigation for any address string
-  const handleOpenGoogleMapNav = (addressStr) => {
-    if (!addressStr) return;
-    
-    // Check if address already contains a direct Google Maps URL
-    const gpsMatch = addressStr.match(/https?:\/\/[^\s]+/);
-    if (gpsMatch) {
-      window.open(gpsMatch[0], '_blank');
-    } else {
-      const encodedAddress = encodeURIComponent(addressStr);
-      const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
-      window.open(googleMapsUrl, '_blank');
-    }
-  };
+  // Fetch live persistent dashboard metrics from Supabase
+  const loadDashboardMetrics = useCallback(async () => {
+    setMetricsLoading(true);
+    setMetricsError(null);
 
-  // Orders State (Pending, Completed, Cancelled)
-  const [localOrders, setLocalOrders] = useState(() => {
-    if (ordersList && ordersList.length > 0) return ordersList;
-    return [
-      {
-        id: 'ORD-1003',
-        customerName: 'सुनील देशपांडे (Sunil Deshpande)',
-        customerPhone: '9823055443',
-        customerAddress: 'कर्वे नगर, पुणे',
-        itemsSummary: '१x पुरणपोळी थाळी',
-        total: 220,
-        date: new Date().toLocaleDateString(),
-        time: '01:15 PM',
-        status: 'Completed'
-      },
-      {
-        id: 'ORD-1002',
-        customerName: 'रमेश पाटील (Ramesh Patil)',
-        customerPhone: '9822012345',
-        customerAddress: 'फ्लॅट १०२, कोथरूड, पुणे',
-        itemsSummary: '२x पुरणपोळी थाळी, १x बासुंदी',
-        total: 620,
-        date: new Date().toLocaleDateString(),
-        time: '12:30 PM',
-        status: 'Completed'
-      },
-      {
-        id: 'ORD-1001',
-        customerName: 'प्रिया कुलकर्णी (Priya Kulkarni)',
-        customerPhone: '9422567890',
-        customerAddress: 'घर नं ४५, बाणेर, पुणे [📍 GPS: https://maps.google.com/?q=18.5590,73.7868]',
-        itemsSummary: '१x महिना डबा योजना (Monthly Tiffin)',
-        total: 3600,
-        date: new Date().toLocaleDateString(),
-        time: '10:15 AM',
-        status: 'Pending'
+    try {
+      const res = await fetchDashboardMetrics();
+      if (res.error) {
+        setMetricsError(res.error);
+        setMetrics({
+          firstOpenDevices: null,
+          totalRegisteredCustomers: null,
+          uniqueCustomersLoggedIn: null
+        });
+      } else {
+        setMetrics({
+          firstOpenDevices: res.firstOpenDevices ?? 0,
+          totalRegisteredCustomers: res.totalRegisteredCustomers ?? 0,
+          uniqueCustomersLoggedIn: res.uniqueCustomersLoggedIn ?? 0
+        });
       }
-    ];
-  });
+    } catch (err) {
+      setMetricsError(err.message || 'Failed to load dashboard metrics');
+      setMetrics({
+        firstOpenDevices: null,
+        totalRegisteredCustomers: null,
+        uniqueCustomersLoggedIn: null
+      });
+    } finally {
+      setMetricsLoading(false);
+    }
+  }, []);
 
-  const pendingOrders = localOrders.filter(o => o.status === 'Pending' || o.status === 'pending');
-  const completedOrders = localOrders.filter(o => o.status === 'Completed' || o.status === 'completed');
-  const cancelledOrders = localOrders.filter(o => o.status === 'Cancelled' || o.status === 'cancelled');
-
-  const totalCompletedRevenue = completedOrders.reduce((acc, curr) => acc + (curr.total || 0), 0);
-  const totalCancelledLostRevenue = cancelledOrders.reduce((acc, curr) => acc + (curr.total || 0), 0);
-  const totalPendingValue = pendingOrders.reduce((acc, curr) => acc + (curr.total || 0), 0);
-
-  const handleSaveDailyMenu = (e) => {
-    e.preventDefault();
-    const updated = {
-      breakfast: breakfastVal,
-      lunch: lunchVal,
-      updatedAt: new Date().toLocaleTimeString()
-    };
-    onUpdateTodayMenu(updated);
-    triggerSyncAlert(lang === 'en' ? "Today's menu saved & broadcasted to all customer phones!" : "आजचा खास मेनू बदलला! सर्व ग्राहकांच्या मोबाईलवर अपडेट झाला.");
-  };
+  useEffect(() => {
+    loadDashboardMetrics();
+  }, [loadDashboardMetrics]);
 
   const handleSaveThaliItems = (itemId) => {
     const list = editingThaliItems.split(',').map((s) => s.trim()).filter(Boolean);
@@ -165,55 +136,7 @@ export default function OwnerAdmin({
     });
     setEditingThaliId(null);
     if (onUpdateItems) onUpdateItems(updatedItems);
-    triggerSyncAlert(lang === 'en' ? 'Thali Menu Updated & Broadcasted!' : 'थळीतील घटक बदलले! सर्व मोबाईलमध्ये अपडेट झाले.');
-  };
-
-  const handleAddManualOrder = (e) => {
-    e.preventDefault();
-    if (!custName || !orderAmount) {
-      alert(lang === 'en' ? 'Please enter customer name and total amount.' : 'कृपया ग्राहकाचे नाव व रक्कमेची नोंद करा.');
-      return;
-    }
-
-    const newOrder = {
-      id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-      customerName: custName,
-      customerPhone: custPhone || '7507969291',
-      customerAddress: custAddress || 'घरगुती डिलिव्हरी',
-      itemsSummary: orderDetails || 'घरगुती जेवण ऑर्डर',
-      total: parseFloat(orderAmount),
-      date: new Date().toLocaleDateString(),
-      time: new Date().toLocaleTimeString(),
-      status: 'Pending'
-    };
-
-    setLocalOrders([newOrder, ...localOrders]);
-    setShowManualOrderModal(false);
-    setCustName('');
-    setCustPhone('');
-    setCustAddress('');
-    setOrderDetails('');
-    setOrderAmount('');
-    triggerSyncAlert(lang === 'en' ? 'New Pending Order Recorded!' : 'ऑर्डरची बाकी (Pending) मध्ये नोंद झाली!');
-  };
-
-  const handleChangeOrderStatus = (orderId, newStatus) => {
-    setLocalOrders((prev) => {
-      const updated = prev.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord));
-      localStorage.setItem('anuprita_kitchen_orders_v26', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const handleDeleteOrder = (orderId) => {
-    if (window.confirm(lang === 'en' ? 'Are you sure you want to delete this order record permanently?' : 'ही ऑर्डर रेकॉर्ड लेजरमधून पूर्णपणे हटवायची आहे का?')) {
-      setLocalOrders((prev) => {
-        const updated = prev.filter((ord) => ord.id !== orderId);
-        localStorage.setItem('anuprita_kitchen_orders_v26', JSON.stringify(updated));
-        return updated;
-      });
-      triggerSyncAlert(lang === 'en' ? 'Order record deleted from financial ledger!' : 'ऑर्डर रेकॉर्ड लेजरमधून हटवला गेला!');
-    }
+    triggerSyncAlert(lang === 'en' ? 'Thali Menu Updated & Broadcasted!' : 'थाळीतील घटक बदलले! सर्व मोबाईलमध्ये अपडेट झाले.');
   };
 
   // Resizes and compresses heavy mobile camera photos cleanly
@@ -254,7 +177,7 @@ export default function OwnerAdmin({
   };
 
   const handleFileUpload = (e, callback) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       compressAndProcessFile(file, (compressedUrl) => {
         callback(compressedUrl);
@@ -320,7 +243,6 @@ export default function OwnerAdmin({
   const handleSavePrice = (id) => {
     if (editPriceVal) {
       onUpdatePrice(id, parseFloat(editPriceVal));
-      const updatedItems = items.map(i => i.id === id ? { ...i, price: parseFloat(editPriceVal) } : i);
       triggerSyncAlert(lang === 'en' ? 'Price updated & broadcasted to all devices!' : 'किंमत बदलली! सर्व मोबाईलवर नवीन किंमत १ सेकंदात अपडेट झाली.');
     }
     setEditingId(null);
@@ -329,502 +251,151 @@ export default function OwnerAdmin({
   const handleConfirmDelete = (id, name) => {
     if (window.confirm(lang === 'en' ? `Are you sure you want to remove "${name}"?` : `तुम्हाला नक्की "${name}" हा पदार्थ काढून टाकायचा आहे का?`)) {
       onRemoveItem(id);
-      const updatedItems = items.filter(i => i.id !== id);
       triggerSyncAlert(lang === 'en' ? 'Item removed from all customer apps!' : 'पदार्थ काढून टाकला! सर्व मोबाईलवरून लगेच निघून गेला.');
     }
   };
 
-  const getDisplayedOrders = () => {
-    if (orderFilterTab === 'pending') return pendingOrders;
-    if (orderFilterTab === 'completed') return completedOrders;
-    return cancelledOrders;
-  };
-
-  const displayedOrders = getDisplayedOrders();
-
   return (
     <div className="owner-panel">
-      {/* Banner */}
-      <div className="welcome-banner" style={{ background: 'linear-gradient(135deg, #1c1917 0%, #292524 100%)', borderBottom: '2px solid #ea580c' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-              <span className="welcome-badge" style={{ background: '#ea580c', color: 'white' }}>
-                <Sparkles size={12} style={{ display: 'inline', marginRight: '4px' }} />
-                {lang === 'en' ? "Owner: Reva Hosing Dashboard" : 'मालक: रेवा होसिंग डॅशबोर्ड'}
-              </span>
-
-              {/* REALTIME CLOUD AUTO-SYNC STATUS BADGE */}
-              <span style={{ background: '#16a34a', color: 'white', fontSize: '0.68rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                <Cloud size={11} />
-                <span>{lang === 'en' ? 'Cloud Sync: Active' : '☁️ क्लाउड सिंक: चालू'}</span>
-              </span>
-            </div>
-
-            <h2 className="welcome-title" style={{ color: '#fef08a' }}>
-              {lang === 'en' ? 'Reva Hosing - Analytics & Live Sync' : 'रेवा होसिंग - ऑर्डर्स व रिअल-टाईम बदल'}
-            </h2>
-            <p className="welcome-subtitle">
-              {lang === 'en' 
-                ? 'Any price or menu change made here instantly updates on all installed customer phones!' 
-                : 'येथून बदललेली किंमत किंवा मेनू १ सेकंदात सर्व ग्राहकांच्या मोबाईलवर दिसायला सुरुवात होते!'}
-            </p>
-          </div>
-
-          <button
-            onClick={onLockOwner}
-            style={{
-              background: 'rgba(255, 255, 255, 0.15)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              color: 'white',
-              padding: '6px 12px',
-              borderRadius: '20px',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <Lock size={13} />
-            <span>{lang === 'en' ? 'Lock Panel' : 'लॉक करा'}</span>
-          </button>
-        </div>
-      </div>
-
       {/* SYNC NOTIFICATION TOAST */}
       {syncMessage && (
-        <div style={{ background: '#16a34a', color: 'white', padding: '10px 14px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)' }}>
-          <CloudCheck size={18} />
+        <div style={{ background: '#16a34a', color: 'white', padding: '8px 12px', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)' }}>
+          <CloudCheck size={16} />
           <span>{syncMessage}</span>
         </div>
       )}
 
-      {/* APP INSTALLS & VISITORS TRACKER CARD */}
-      <div className="stat-grid" style={{ marginBottom: '8px' }}>
-        <div className="stat-card" style={{ background: '#eff6ff', border: '1.5px solid #bfdbfe' }}>
-          <span className="stat-lbl" style={{ color: '#1e40af', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Smartphone size={14} color="#2563eb" />
-            {lang === 'en' ? 'App Installed Devices' : 'ॲप इन्स्टॉल केलेल्या व्यक्ती'}
-          </span>
-          <span className="stat-val" style={{ color: '#1d4ed8', fontSize: '1.5rem', fontWeight: 800 }}>
-            {installCount} <span style={{ fontSize: '0.72rem', color: '#1e3a8a', fontWeight: 700 }}>{lang === 'en' ? 'Devices' : 'मोबाईल'}</span>
-          </span>
-          <span style={{ fontSize: '0.68rem', color: '#3b82f6', fontWeight: 700 }}>
-            {lang === 'en' ? '✓ Installed Home Screen App' : '✓ मोबाईल होम स्क्रीनवर ॲप वापरकर्ते'}
-          </span>
-        </div>
-
-        <div className="stat-card" style={{ background: '#faf5ff', border: '1.5px solid #e9d5ff' }}>
-          <span className="stat-lbl" style={{ color: '#6b21a8', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Users size={14} color="#9333ea" />
-            {lang === 'en' ? 'Total App Visitors' : 'एकूण मोबाईल ॲप भेट'}
-          </span>
-          <span className="stat-val" style={{ color: '#7e22ce', fontSize: '1.5rem', fontWeight: 800 }}>
-            {visitorCount} <span style={{ fontSize: '0.72rem', color: '#581c87', fontWeight: 700 }}>{lang === 'en' ? 'Visits' : 'भेटकर्ते'}</span>
-          </span>
-          <span style={{ fontSize: '0.68rem', color: '#a855f7', fontWeight: 700 }}>
-            {lang === 'en' ? '🌐 Total Online Unique Visitors' : '🌐 मोबाईलवर ॲप पाहणाऱ्या व्यक्ती'}
-          </span>
-        </div>
-      </div>
-
-
-
-      {/* FINANCIAL MONTH-END SUMMARY CARDS */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <div style={{ background: 'linear-gradient(135deg, #15803d 0%, #166534 100%)', color: 'white', padding: '14px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(22, 101, 52, 0.2)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, opacity: 0.9, display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <TrendingUp size={14} /> {lang === 'en' ? 'Net Monthly Income (Completed Orders)' : 'महिन्याचे एकूण मिळालेले जमा उत्पन्न'}
-            </span>
-            <span style={{ fontSize: '0.68rem', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '10px', fontWeight: 800 }}>
-              {lang === 'en' ? 'Net Profit' : 'निव्वळ नफा'}
-            </span>
+      {/* COMPACT SINGLE ROW: TOTAL REGISTERED CUSTOMERS */}
+      <div 
+        style={{
+          background: '#ffffff',
+          border: '1.5px solid #bbf7d0',
+          borderRadius: '12px',
+          padding: '8px 12px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)'
+        }}
+      >
+        {/* Left: Icon and Label */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+          <div style={{ 
+            width: '28px', 
+            height: '28px', 
+            borderRadius: '8px', 
+            background: '#dcfce7', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <Users size={15} color="#16a34a" />
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, marginTop: '4px' }}>
-            ₹{totalCompletedRevenue}
-          </div>
-          <div style={{ fontSize: '0.72rem', opacity: 0.85, marginTop: '2px' }}>
-            {lang === 'en' 
-              ? `From ${completedOrders.length} Successfully Completed & Paid Orders` 
-              : `${completedOrders.length} पूर्ण झालेल्या ऑर्डर्समधून मिळालेले पैसे`}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ 
+              fontSize: '0.78rem', 
+              fontWeight: 800, 
+              color: '#166534', 
+              lineHeight: 1.2,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {lang === 'en' ? 'Total Registered Customers' : 'एकूण नोंदणीकृत ग्राहक'}
+            </div>
+            <div style={{ fontSize: '0.62rem', color: '#15803d', fontWeight: 600 }}>
+              {lang === 'en' ? 'Live Supabase count' : 'थेट डेटाबेस नोंदणी'}
+            </div>
           </div>
         </div>
 
-        <div className="stat-grid">
-          <div className="stat-card" style={{ background: '#fff7ed', border: '1px solid #ffedd5' }}>
-            <span className="stat-lbl" style={{ color: '#b45309', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
-              <Clock size={12} /> {lang === 'en' ? 'Pending Sales' : 'बाकी (Pending) ऑर्डर्स'}
+        {/* Right: Count and Actions (Refresh & Lock) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          {metricsLoading ? (
+            <span style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+              <RefreshCw size={11} style={{ animation: 'spin 1s linear infinite' }} />
+              ...
             </span>
-            <span className="stat-val" style={{ color: '#d97706', fontSize: '1.25rem' }}>₹{totalPendingValue}</span>
-            <span style={{ fontSize: '0.68rem', color: '#78716c' }}>({pendingOrders.length} Orders Pending)</span>
-          </div>
-
-          <div className="stat-card" style={{ background: '#fef2f2', border: '1px solid #fecaca' }}>
-            <span className="stat-lbl" style={{ color: '#b91c1c', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
-              <XCircle size={12} /> {lang === 'en' ? 'Cancelled Orders' : 'कॅन्सल ऑर्डर्स (Lost)'}
+          ) : metricsError ? (
+            <button
+              onClick={loadDashboardMetrics}
+              title={metricsError}
+              style={{
+                background: '#fee2e2',
+                border: '1px solid #fca5a5',
+                color: '#b91c1c',
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                padding: '2px 6px',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              {lang === 'en' ? 'Retry' : 'पुन्हा बघा'}
+            </button>
+          ) : (
+            <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#15803d', minWidth: '22px', textAlign: 'right' }}>
+              {metrics.totalRegisteredCustomers ?? 0}
             </span>
-            <span className="stat-val" style={{ color: '#dc2626', fontSize: '1.25rem' }}>₹{totalCancelledLostRevenue}</span>
-            <span style={{ fontSize: '0.68rem', color: '#991b1b' }}>({cancelledOrders.length} Orders Cancelled)</span>
-          </div>
-        </div>
-      </div>
-
-      {/* PENDING vs COMPLETED vs CANCELLED ORDERS SECTIONS */}
-      <div className="calc-card" style={{ background: 'white', border: '1.5px solid #ea580c' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1c1917', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <ShoppingBag size={16} color="#ea580c" />
-            <span>{lang === 'en' ? 'Detailed Financial Order Ledger' : 'सविस्तर ऑर्डर्स व रकमांचा हिशोब'}</span>
-          </h3>
+          )}
 
           <button
-            onClick={() => setShowManualOrderModal(true)}
+            onClick={loadDashboardMetrics}
+            disabled={metricsLoading}
+            title={lang === 'en' ? 'Refresh count' : 'रिफ्रेश करा'}
             style={{
-              background: '#16a34a',
-              color: 'white',
-              border: 'none',
-              padding: '4px 10px',
-              borderRadius: '12px',
-              fontSize: '0.72rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'flex',
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              color: '#166534',
+              padding: '4px 6px',
+              borderRadius: '6px',
+              cursor: metricsLoading ? 'not-allowed' : 'pointer',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px'
+              justifyContent: 'center'
             }}
           >
-            <Plus size={12} />
-            <span>{lang === 'en' ? 'Add Order' : 'नवीन नोंद'}</span>
+            <RefreshCw size={11} style={{ animation: metricsLoading ? 'spin 1s linear infinite' : 'none' }} />
           </button>
+
+          {onLockOwner && (
+            <button
+              onClick={onLockOwner}
+              title={lang === 'en' ? 'Lock Owner Admin' : 'ॲडमिन लॉक करा'}
+              style={{
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                color: '#dc2626',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                fontSize: '0.68rem',
+                fontWeight: 700
+              }}
+            >
+              <Lock size={10} />
+              <span>{lang === 'en' ? 'Lock' : 'लॉक'}</span>
+            </button>
+          )}
         </div>
-
-        {/* Pending vs Completed vs Cancelled Tabs */}
-        <div style={{ display: 'flex', gap: '4px', background: '#f5f5f4', padding: '3px', borderRadius: '12px' }}>
-          <button
-            onClick={() => setOrderFilterTab('pending')}
-            style={{
-              flex: 1,
-              padding: '6px 4px',
-              borderRadius: '9px',
-              border: 'none',
-              background: orderFilterTab === 'pending' ? '#ea580c' : 'transparent',
-              color: orderFilterTab === 'pending' ? 'white' : '#57534e',
-              fontSize: '0.7rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '3px'
-            }}
-          >
-            <Clock size={12} />
-            <span>{lang === 'en' ? `Pending (${pendingOrders.length})` : `बाकी (${pendingOrders.length})`}</span>
-          </button>
-
-          <button
-            onClick={() => setOrderFilterTab('completed')}
-            style={{
-              flex: 1,
-              padding: '6px 4px',
-              borderRadius: '9px',
-              border: 'none',
-              background: orderFilterTab === 'completed' ? '#16a34a' : 'transparent',
-              color: orderFilterTab === 'completed' ? 'white' : '#57534e',
-              fontSize: '0.7rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '3px'
-            }}
-          >
-            <CheckCircle2 size={12} />
-            <span>{lang === 'en' ? `Done (${completedOrders.length})` : `पूर्ण (${completedOrders.length})`}</span>
-          </button>
-
-          <button
-            onClick={() => setOrderFilterTab('cancelled')}
-            style={{
-              flex: 1,
-              padding: '6px 4px',
-              borderRadius: '9px',
-              border: 'none',
-              background: orderFilterTab === 'cancelled' ? '#dc2626' : 'transparent',
-              color: orderFilterTab === 'cancelled' ? 'white' : '#57534e',
-              fontSize: '0.7rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '3px'
-            }}
-          >
-            <XCircle size={12} />
-            <span>{lang === 'en' ? `Cancel (${cancelledOrders.length})` : `कॅन्सल (${cancelledOrders.length})`}</span>
-          </button>
-        </div>
-
-        {/* Orders List Container */}
-        {displayedOrders.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '24px 10px', color: '#78716c' }}>
-            <AlertCircle size={32} style={{ opacity: 0.3, marginBottom: '6px' }} />
-            <p style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-              {orderFilterTab === 'pending' 
-                ? (lang === 'en' ? 'No pending orders right now.' : 'सध्या कोणतीही बाकी (Pending) ऑर्डर नाही.') 
-                : orderFilterTab === 'completed'
-                ? (lang === 'en' ? 'No completed orders yet.' : 'अद्याप कोणतीही पूर्ण झालेली ऑर्डर नाही.')
-                : (lang === 'en' ? 'No cancelled orders.' : 'कोणतीही कॅन्सल झालेली ऑर्डर नाही.')}
-            </p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
-            {displayedOrders.map((ord) => (
-              <div 
-                key={ord.id} 
-                style={{
-                  background: ord.status === 'Completed' ? '#f0fdf4' : ord.status === 'Cancelled' ? '#fef2f2' : '#fff7ed',
-                  border: ord.status === 'Completed' ? '1.5px solid #bbf7d0' : ord.status === 'Cancelled' ? '1.5px solid #fca5a5' : '1.5px solid #fed7aa',
-                  borderRadius: '12px',
-                  padding: '10px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '6px'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1c1917' }}>
-                      {ord.customerName}
-                    </span>
-                    <div style={{ fontSize: '0.72rem', color: '#57534e', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                      <Phone size={11} color="#ea580c" />
-                      <span>{ord.customerPhone}</span>
-                      <span style={{ opacity: 0.5 }}>•</span>
-                      <Clock size={11} color="#78716c" />
-                      <span>{ord.date} {ord.time}</span>
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '1.15rem', fontWeight: 800, color: ord.status === 'Cancelled' ? '#dc2626' : '#ea580c' }}>
-                      ₹{ord.total}
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{ fontSize: '0.78rem', color: '#44403c', background: 'white', padding: '6px 8px', borderRadius: '6px', border: '1px solid #e7e5e4' }}>
-                  <strong>{lang === 'en' ? 'Items:' : 'ऑर्डर मेनू:'}</strong> {ord.itemsSummary || (ord.items ? ord.items.map(i => i.name + ' x' + i.qty).join(', ') : 'घरगुती ऑर्डर')}
-                </div>
-
-                {/* CLICKABLE GOOGLE MAPS DELIVERY ADDRESS BUTTON FOR DELIVERY BOY */}
-                {ord.customerAddress && (
-                  <div 
-                    onClick={() => handleOpenGoogleMapNav(ord.customerAddress)}
-                    style={{ 
-                      fontSize: '0.75rem', 
-                      color: '#1d4ed8', 
-                      background: '#eff6ff',
-                      padding: '6px 8px',
-                      borderRadius: '8px',
-                      border: '1px solid #bfdbfe',
-                      cursor: 'pointer',
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'space-between',
-                      gap: '4px',
-                      fontWeight: 700
-                    }}
-                    title="Click to open Google Maps navigation"
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, overflow: 'hidden' }}>
-                      <MapPin size={14} color="#2563eb" />
-                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {ord.customerAddress}
-                      </span>
-                    </div>
-
-                    <span style={{ background: '#2563eb', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
-                      <Navigation size={10} />
-                      <span>{lang === 'en' ? 'Maps Nav' : '🗺️ रस्ता पाहा'}</span>
-                    </span>
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', paddingTop: '6px', borderTop: '1px dashed #e7e5e4', flexWrap: 'wrap', gap: '4px' }}>
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    <a
-                      href={`tel:${ord.customerPhone}`}
-                      style={{
-                        background: '#16a34a',
-                        color: 'white',
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        textDecoration: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '3px'
-                      }}
-                    >
-                      <Phone size={10} /> {lang === 'en' ? 'Call' : 'फोन'}
-                    </a>
-                    <a
-                      href={`https://wa.me/91${ord.customerPhone.replace(/\D/g, '')}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{
-                        background: '#25D366',
-                        color: 'white',
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        textDecoration: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '3px'
-                      }}
-                    >
-                      <MessageSquare size={10} /> WhatsApp
-                    </a>
-
-                    {ord.customerAddress && (
-                      <button
-                        onClick={() => handleOpenGoogleMapNav(ord.customerAddress)}
-                        style={{
-                          background: '#0284c7',
-                          color: 'white',
-                          border: 'none',
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          fontSize: '0.68rem',
-                          fontWeight: 800,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px'
-                        }}
-                      >
-                        <Map size={10} /> {lang === 'en' ? 'Google Maps' : 'गूगल मॅप'}
-                      </button>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    {ord.status !== 'Completed' && (
-                      <button
-                        onClick={() => handleChangeOrderStatus(ord.id, 'Completed')}
-                        style={{
-                          background: '#16a34a',
-                          color: 'white',
-                          border: 'none',
-                          padding: '4px 8px',
-                          borderRadius: '8px',
-                          fontSize: '0.68rem',
-                          fontWeight: 800,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '3px'
-                        }}
-                      >
-                        <CheckCircle2 size={11} />
-                        <span>{lang === 'en' ? 'Done & Paid' : 'पूर्ण झाले'}</span>
-                      </button>
-                    )}
-
-                    {ord.status !== 'Cancelled' && (
-                      <button
-                        onClick={() => handleChangeOrderStatus(ord.id, 'Cancelled')}
-                        style={{
-                          background: '#dc2626',
-                          color: 'white',
-                          border: 'none',
-                          padding: '4px 8px',
-                          borderRadius: '8px',
-                          fontSize: '0.68rem',
-                          fontWeight: 800,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '3px'
-                        }}
-                      >
-                        <XCircle size={11} />
-                        <span>{lang === 'en' ? 'Cancel' : 'कॅन्सल करा'}</span>
-                      </button>
-                    )}
-
-                    {ord.status !== 'Pending' && (
-                      <button
-                        onClick={() => handleChangeOrderStatus(ord.id, 'Pending')}
-                        style={{
-                          background: '#f59e0b',
-                          color: 'white',
-                          border: 'none',
-                          padding: '4px 8px',
-                          borderRadius: '8px',
-                          fontSize: '0.68rem',
-                          fontWeight: 800,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '3px'
-                        }}
-                      >
-                        <Clock size={11} />
-                        <span>{lang === 'en' ? 'Set Pending' : 'बाकी करा'}</span>
-                      </button>
-                    )}
-
-                    {/* DELETE ORDER RECORD BUTTON */}
-                    <button
-                      onClick={() => handleDeleteOrder(ord.id)}
-                      title={lang === 'en' ? 'Delete Order Record' : 'ऑर्डर रेकॉर्ड लेजरमधून पूर्णपणे हटवा'}
-                      style={{
-                        background: '#fee2e2',
-                        color: '#991b1b',
-                        border: '1px solid #fca5a5',
-                        padding: '4px 8px',
-                        borderRadius: '8px',
-                        fontSize: '0.68rem',
-                        fontWeight: 800,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '3px'
-                      }}
-                    >
-                      <Trash2 size={11} color="#dc2626" />
-                      <span>{lang === 'en' ? 'Delete' : 'हटवा'}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Action Buttons */}
       <button 
         className="submit-btn" 
         onClick={() => setShowAddModal(true)}
-        style={{ background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)', margin: '2px 0 6px 0', padding: '9px' }}
       >
-        <Plus size={18} />
-        <span>{lang === 'en' ? '➕ Add New Item / Dish' : '➕ नवीन थाळी किंवा पदार्थ जोडा'}</span>
+        <Plus size={16} />
+        <span style={{ fontSize: '0.85rem' }}>{lang === 'en' ? '➕ Add New Item / Dish' : '➕ नवीन थाळी किंवा पदार्थ जोडा'}</span>
       </button>
 
       {/* MANAGE & EDIT PRICE & THALI INCLUDED DISHES SECTION */}
-      <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#1c1917', marginTop: '10px' }}>
+      <h3 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1c1917', marginBottom: '6px' }}>
         {lang === 'en' ? 'Edit Prices, Photos & Thali Items (' + items.length + ' Items)' : 'पदार्थांची किंमत, फोटो व थाळी घटक बदला (' + items.length + ' पदार्थ)'}
       </h3>
 
@@ -914,8 +485,7 @@ export default function OwnerAdmin({
                 <button
                   onClick={() => {
                     onToggleStock(item.id);
-                    const updatedItems = items.map(i => i.id === item.id ? { ...i, inStock: !i.inStock } : i);
-                                  triggerSyncAlert(lang === 'en' ? 'Stock status updated & broadcasted!' : 'उपलब्धता बदलली! सर्व मोबाईलवर अपडेट झाली.');
+                    triggerSyncAlert(lang === 'en' ? 'Stock status updated & broadcasted!' : 'उपलब्धता बदलली! सर्व मोबाईलवर अपडेट झाली.');
                   }}
                   style={{
                     padding: '6px 10px',

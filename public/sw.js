@@ -1,5 +1,5 @@
-// Anuprita's Kitchen Service Worker v1.0
-const CACHE_NAME = 'anuprita-kitchen-v1';
+// Anuprita's Kitchen Service Worker v3.0
+const CACHE_NAME = 'anuprita-kitchen-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -21,6 +21,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
+            console.log('[SW] Deleting old cache:', cache);
             return caches.delete(cache);
           }
         })
@@ -31,6 +32,13 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  // Always fetch fresh on localhost to avoid stale cache during development
+  if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {

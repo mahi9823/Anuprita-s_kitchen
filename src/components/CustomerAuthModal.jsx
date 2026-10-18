@@ -1,86 +1,129 @@
-import React, { useState, useEffect } from 'react';
-import { X, User, Phone, MapPin, CheckCircle2, ArrowRight, ShieldCheck, RefreshCw, MessageSquare, AlertCircle, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, User, MapPin, CheckCircle2, ArrowRight, AlertCircle, Info, Sparkles, RefreshCw, LogIn, UserPlus } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { findCustomerProfile, saveCustomerProfile, normalizeMobile } from '../services/userService';
 
 export default function CustomerAuthModal({ lang, onClose, onLoginSuccess }) {
+  const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
   const [address, setAddress] = useState('');
-  const [otpStep, setOtpStep] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
-  const [generatedOtp, setGeneratedOtp] = useState('');
-  const [showSmsToast, setShowSmsToast] = useState(false);
-  const [timer, setTimer] = useState(30);
-  const [canResend, setCanResend] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [infoMessage, setInfoMessage] = useState('');
 
-  // Timer countdown for OTP resend
-  useEffect(() => {
-    let interval = null;
-    if (otpStep && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
-      }, 1000);
-    } else if (timer === 0) {
-      setCanResend(true);
-      if (interval) clearInterval(interval);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [otpStep, timer]);
-
-  const generateAndSendOtp = () => {
-    // Generate random 4-digit OTP code
-    const randomOtp = Math.floor(1000 + Math.random() * 9000).toString();
-    setGeneratedOtp(randomOtp);
-    setShowSmsToast(true);
-    setTimer(30);
-    setCanResend(false);
+  // Handle Login with existing Mobile Number
+  const handleLogin = async (e) => {
+    if (e) e.preventDefault();
     setErrorMessage('');
+    setInfoMessage('');
 
-    // Hide SMS notification toast after 10 seconds
-    setTimeout(() => {
-      setShowSmsToast(false);
-    }, 10000);
-  };
-
-  const handleSendOtp = (e) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      setErrorMessage(lang === 'en' ? 'Please enter your full name.' : 'कृपया तुमचे पूर्ण नाव प्रविष्ट करा.');
-      return;
-    }
-    if (!mobile || mobile.length < 10) {
-      setErrorMessage(lang === 'en' ? 'Please enter a valid 10-digit mobile number.' : 'कृपया वैध १० अंकी मोबाईल नंबर प्रविष्ट करा.');
+    const cleanMobile = normalizeMobile(mobile);
+    if (!cleanMobile || cleanMobile.length !== 10) {
+      setErrorMessage(
+        lang === 'en'
+          ? 'Please enter a valid 10-digit mobile number.'
+          : 'कृपया वैध १० अंकी मोबाईल नंबर प्रविष्ट करा.'
+      );
       return;
     }
 
-    setErrorMessage('');
-    setOtpStep(true);
-    generateAndSendOtp();
+    setIsLoading(true);
+
+    try {
+      const { profile, error } = await findCustomerProfile(cleanMobile);
+
+      if (error) {
+        setErrorMessage(error);
+        setIsLoading(false);
+        return;
+      }
+
+      if (profile && profile.name) {
+        // Existing customer profile found!
+        try {
+          confetti({
+            particleCount: 40,
+            spread: 55,
+            origin: { y: 0.6 }
+          });
+        } catch (err) {
+          console.log(err);
+        }
+
+        setInfoMessage(
+          lang === 'en'
+            ? `Welcome back, ${profile.name}!`
+            : `स्वागत आहे, ${profile.name}!`
+        );
+
+        setTimeout(() => {
+          onLoginSuccess(profile);
+        }, 500);
+      } else {
+        // No existing profile found for this mobile number; switch to Register tab
+        setAuthMode('register');
+        setInfoMessage(
+          lang === 'en'
+            ? `No profile found for +91 ${cleanMobile}. Please enter your full name to complete quick registration.`
+            : `+91 ${cleanMobile} या नंबरवर खाते आढळले नाही. कृपया नोंदणी पूर्ण करण्यासाठी आपले नाव प्रविष्ट करा.`
+        );
+      }
+    } catch (err) {
+      console.error('[CustomerAuthModal] Error finding profile:', err);
+      setErrorMessage(
+        err.message ||
+          (lang === 'en' ? 'Failed to find account. Please try again.' : 'खाते शोधताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.')
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleResendOtp = () => {
-    if (!canResend) return;
-    generateAndSendOtp();
-  };
-
-  const handleVerifyOtp = (e) => {
-    e.preventDefault();
+  // Handle Customer Signup / Registration
+  const handleRegister = async (e) => {
+    if (e) e.preventDefault();
     setErrorMessage('');
+    setInfoMessage('');
 
-    if (otpCode.length !== 4) {
-      setErrorMessage(lang === 'en' ? 'Please enter 4-digit OTP code.' : 'कृपया ४ अंकी OTP प्रविष्ट करा.');
+    const trimmedName = name.trim();
+    const cleanMobile = normalizeMobile(mobile);
+
+    if (!trimmedName) {
+      setErrorMessage(
+        lang === 'en' ? 'Please enter your full name.' : 'कृपया तुमचे पूर्ण नाव प्रविष्ट करा.'
+      );
       return;
     }
 
-    // Verify entered OTP with generated OTP (or demo '1234')
-    if (otpCode === generatedOtp || otpCode === '1234') {
-      setIsVerifying(true);
-      
-      // Trigger success confetti
+    if (!cleanMobile || cleanMobile.length !== 10) {
+      setErrorMessage(
+        lang === 'en'
+          ? 'Please enter a valid 10-digit mobile number.'
+          : 'कृपया वैध १० अंकी मोबाईल नंबर प्रविष्ट करा.'
+      );
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { profile, error } = await saveCustomerProfile({
+        name: trimmedName,
+        mobile: cleanMobile,
+        address: address.trim()
+      });
+
+      if (error || !profile) {
+        setErrorMessage(
+          error ||
+            (lang === 'en' ? 'Failed to save customer profile.' : 'नोंदणी सेव्ह करताना त्रुटी आली.')
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      // Registration successful!
       try {
         confetti({
           particleCount: 50,
@@ -91,79 +134,52 @@ export default function CustomerAuthModal({ lang, onClose, onLoginSuccess }) {
         console.log(err);
       }
 
+      setInfoMessage(
+        lang === 'en'
+          ? `Welcome to Anuprita's Kitchen, ${profile.name}!`
+          : `अनुप्रिताज किचनमध्ये आपले स्वागत आहे, ${profile.name}!`
+      );
+
       setTimeout(() => {
-        const userObj = {
-          id: 'CUST-' + mobile.slice(-4) + Math.floor(100 + Math.random() * 900),
-          name: name.trim(),
-          mobile: mobile.trim(),
-          address: address.trim(),
-          joinedDate: new Date().toLocaleDateString()
-        };
-        onLoginSuccess(userObj);
-      }, 600);
-    } else {
-      setErrorMessage(lang === 'en' ? 'Incorrect OTP code! Please check SMS notification.' : 'चुकीचा OTP कोड! कृपया एसएमएस तपासा आणि पुन्हा प्रयत्न करा.');
+        onLoginSuccess(profile);
+      }, 500);
+    } catch (err) {
+      console.error('[CustomerAuthModal] Error creating profile:', err);
+      setErrorMessage(
+        err.message ||
+          (lang === 'en' ? 'Failed to register. Please check your connection.' : 'नोंदणी करताना त्रुटी आली. कृपया नेटवर्क तपासा.')
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '420px', borderRadius: '20px', overflow: 'hidden' }}>
-        
-        {/* SMS Notification Banner Toast */}
-        {showSmsToast && (
-          <div style={{
-            background: 'linear-gradient(135deg, #1e1b4b 0%, #311042 100%)',
-            color: 'white',
-            padding: '10px 14px',
-            fontSize: '0.78rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: '2px solid #818cf8',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ background: '#4f46e5', padding: '5px', borderRadius: '50%' }}>
-                <MessageSquare size={14} color="white" />
-              </div>
-              <div>
-                <div style={{ fontWeight: 800, color: '#c7d2fe', fontSize: '0.7rem' }}>
-                  💬 SMS Alert (+91 {mobile}):
-                </div>
-                <div style={{ fontWeight: 700, color: '#ffffff' }}>
-                  {lang === 'en' ? `Anuprita's Kitchen OTP Code: ` : `अनुप्रिताज किचन OTP कोड: `}
-                  <strong style={{ color: '#fef08a', fontSize: '0.9rem', letterSpacing: '2px', background: '#3730a3', padding: '1px 6px', borderRadius: '4px' }}>
-                    {generatedOtp}
-                  </strong>
-                </div>
-              </div>
-            </div>
-            <button 
-              onClick={() => setShowSmsToast(false)}
-              style={{ background: 'none', border: 'none', color: '#a5b4fc', cursor: 'pointer', padding: '2px' }}
-            >
-              <X size={14} />
-            </button>
-          </div>
-        )}
-
+      <div
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: '420px', borderRadius: '20px', overflow: 'hidden' }}
+      >
         {/* Modal Header */}
-        <div className="modal-header" style={{ padding: '16px 20px', background: '#fdf8f6', borderBottom: '1px solid #f5e0d8' }}>
+        <div
+          className="modal-header"
+          style={{ padding: '16px 20px', background: '#fdf8f6', borderBottom: '1px solid #f5e0d8' }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ background: '#ea580c', padding: '6px', borderRadius: '10px', color: 'white' }}>
-              <ShieldCheck size={18} />
+              <User size={18} />
             </div>
             <div>
               <h3 className="modal-title" style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: '#1c1917' }}>
-                {otpStep 
-                  ? (lang === 'en' ? 'Mobile OTP Verification' : 'मोबाईल OTP पडताळणी') 
-                  : (lang === 'en' ? 'Customer Signup / Login' : 'ग्राहक नोंदणी व लॉगिन')}
+                {authMode === 'login'
+                  ? (lang === 'en' ? 'Customer Login' : 'ग्राहक लॉगिन')
+                  : (lang === 'en' ? 'Customer Registration' : 'ग्राहक नोंदणी')}
               </h3>
               <p style={{ fontSize: '0.68rem', color: '#78716c', margin: 0 }}>
-                {otpStep 
-                  ? (lang === 'en' ? 'Enter 4-digit code sent to your phone' : 'तुमच्या फोनवर आलेला ४ अंकी कोड टाका') 
-                  : (lang === 'en' ? 'Enter mobile number to receive OTP' : 'OTP मिळवण्यासाठी मोबाईल नंबर टाका')}
+                {authMode === 'login'
+                  ? (lang === 'en' ? 'Login with your 10-digit mobile number' : '१० अंकी मोबाईल नंबरने लॉगिन करा')
+                  : (lang === 'en' ? 'Enter name and mobile to create your account' : 'खाते तयार करण्यासाठी नाव व मोबाईल नंबर टाका')}
               </p>
             </div>
           </div>
@@ -173,47 +189,258 @@ export default function CustomerAuthModal({ lang, onClose, onLoginSuccess }) {
         </div>
 
         <div style={{ padding: '20px' }}>
-          {/* Error Message Box */}
-          {errorMessage && (
-            <div style={{
-              background: '#fef2f2',
-              border: '1px solid #fecaca',
-              color: '#991b1b',
-              padding: '8px 12px',
-              borderRadius: '10px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              marginBottom: '14px',
+          {/* Mode Switcher Tabs */}
+          <div
+            style={{
+              display: 'flex',
+              background: '#f5f5f4',
+              padding: '4px',
+              borderRadius: '12px',
+              marginBottom: '14px'
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('login');
+                setErrorMessage('');
+                setInfoMessage('');
+              }}
+              style={{
+                flex: 1,
+                padding: '8px 10px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '0.82rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                background: authMode === 'login' ? '#ffffff' : 'transparent',
+                color: authMode === 'login' ? '#ea580c' : '#78716c',
+                boxShadow: authMode === 'login' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <LogIn size={14} />
+              <span>{lang === 'en' ? 'Quick Login' : 'मोबाईल लॉगिन'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('register');
+                setErrorMessage('');
+                setInfoMessage('');
+              }}
+              style={{
+                flex: 1,
+                padding: '8px 10px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '0.82rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                background: authMode === 'register' ? '#ffffff' : 'transparent',
+                color: authMode === 'register' ? '#ea580c' : '#78716c',
+                boxShadow: authMode === 'register' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <UserPlus size={14} />
+              <span>{lang === 'en' ? 'New Register' : 'नवीन नोंदणी'}</span>
+            </button>
+          </div>
+
+          {/* Quick Notice Card */}
+          <div
+            style={{
+              background: '#fff7ed',
+              border: '1px solid #ffedd5',
+              borderRadius: '12px',
+              padding: '10px 12px',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
-            }}>
-              <AlertCircle size={15} />
+              gap: '8px',
+              marginBottom: '14px'
+            }}
+          >
+            <Sparkles size={16} color="#ea580c" style={{ flexShrink: 0 }} />
+            <span style={{ fontSize: '0.74rem', color: '#9a3412', fontWeight: 700, lineHeight: 1.35 }}>
+              {authMode === 'login'
+                ? (lang === 'en'
+                    ? 'Enter your mobile number. We will load your profile and past orders instantly.'
+                    : 'तुमचा मोबाईल नंबर टाका. तुमचे प्रोफाइल व मागील ऑर्डर्स त्वरित लोड होतील.')
+                : (lang === 'en'
+                    ? 'Enter your full name and mobile number to create your profile.'
+                    : 'प्रोफाइल तयार करण्यासाठी तुमचे पूर्ण नाव आणि मोबाईल नंबर टाका.')}
+            </span>
+          </div>
+
+          {/* Error Message Box */}
+          {errorMessage && (
+            <div
+              style={{
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                color: '#991b1b',
+                padding: '10px 12px',
+                borderRadius: '10px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                marginBottom: '14px',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '8px',
+                lineHeight: 1.4
+              }}
+            >
+              <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
               <span>{errorMessage}</span>
             </div>
           )}
 
-          {!otpStep ? (
-            /* STEP 1: MOBILE NUMBER & NAME ENTRY FORM */
-            <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ background: '#fff7ed', border: '1px solid #ffedd5', borderRadius: '12px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sparkles size={16} color="#ea580c" />
-                <span style={{ fontSize: '0.76rem', color: '#9a3412', fontWeight: 700, lineHeight: 1.3 }}>
-                  {lang === 'en' 
-                    ? 'Enter your mobile number. We will send an SMS OTP for instant 1-click login.' 
-                    : 'मोबाईल नंबर प्रविष्ट करा. त्वरित लॉगिनसाठी SMS द्वारे OTP पाठवला जाईल.'}
-                </span>
+          {/* Info / Success Message Box */}
+          {infoMessage && (
+            <div
+              style={{
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                color: '#1e40af',
+                padding: '10px 12px',
+                borderRadius: '10px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                marginBottom: '14px',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '8px',
+                lineHeight: 1.4
+              }}
+            >
+              <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span>{infoMessage}</span>
+            </div>
+          )}
+
+          {authMode === 'login' ? (
+            /* TAB 1: QUICK LOGIN FORM (Mobile Only) */
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 800, color: '#374151' }}>
+                  {lang === 'en' ? 'Mobile Number (10 Digits) *' : 'मोबाईल नंबर (१० अंक) *'}
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: '#4b5563',
+                      fontWeight: 800,
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    +91
+                  </span>
+                  <input
+                    type="tel"
+                    required
+                    maxLength={10}
+                    autoFocus
+                    className="form-input"
+                    style={{
+                      paddingLeft: '48px',
+                      borderRadius: '10px',
+                      fontSize: '0.95rem',
+                      fontWeight: 700,
+                      letterSpacing: '1px'
+                    }}
+                    placeholder="98220XXXXX"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                  />
+                </div>
               </div>
 
+              <button
+                type="submit"
+                disabled={isLoading}
+                style={{
+                  background: isLoading ? '#9a3412' : 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  fontSize: '0.9rem',
+                  fontWeight: 800,
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)',
+                  marginTop: '4px'
+                }}
+              >
+                {isLoading ? (
+                  <>
+                    <RefreshCw size={18} className="spin-icon" />
+                    <span>{lang === 'en' ? 'Finding Account...' : 'खाते शोधत आहे...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{lang === 'en' ? 'Find Account & Login' : 'खाते शोधा व लॉगिन करा'}</span>
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+
+              <div style={{ textAlign: 'center', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('register');
+                    setErrorMessage('');
+                    setInfoMessage('');
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#ea580c',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  {lang === 'en' ? 'New customer? Click here to register' : 'नवीन ग्राहक? येथे नोंदणी करा'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            /* TAB 2: REGISTRATION FORM (Full Name + Mobile + Optional Address) */
+            <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: 800, color: '#374151' }}>
                   {lang === 'en' ? 'Full Name *' : 'तुमचे पूर्ण नाव *'}
                 </label>
                 <div style={{ position: 'relative' }}>
-                  <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }} />
+                  <User
+                    size={16}
+                    style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#78716c' }}
+                  />
                   <input
                     type="text"
                     required
+                    autoFocus
                     className="form-input"
                     style={{ paddingLeft: '38px', borderRadius: '10px', fontSize: '0.88rem' }}
                     placeholder={lang === 'en' ? 'e.g. Rahul Sharma' : 'उदा. राहुल शर्मा'}
@@ -228,7 +455,17 @@ export default function CustomerAuthModal({ lang, onClose, onLoginSuccess }) {
                   {lang === 'en' ? 'Mobile Number (10 Digits) *' : 'मोबाईल नंबर (१० अंक) *'}
                 </label>
                 <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#4b5563', fontWeight: 800, fontSize: '0.85rem' }}>
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: '#4b5563',
+                      fontWeight: 800,
+                      fontSize: '0.85rem'
+                    }}
+                  >
                     +91
                   </span>
                   <input
@@ -236,7 +473,13 @@ export default function CustomerAuthModal({ lang, onClose, onLoginSuccess }) {
                     required
                     maxLength={10}
                     className="form-input"
-                    style={{ paddingLeft: '48px', borderRadius: '10px', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '1px' }}
+                    style={{
+                      paddingLeft: '48px',
+                      borderRadius: '10px',
+                      fontSize: '0.95rem',
+                      fontWeight: 700,
+                      letterSpacing: '1px'
+                    }}
                     placeholder="98220XXXXX"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
@@ -263,221 +506,67 @@ export default function CustomerAuthModal({ lang, onClose, onLoginSuccess }) {
 
               <button
                 type="submit"
+                disabled={isLoading}
                 style={{
-                  background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                  background: isLoading ? '#15803d' : 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
                   color: 'white',
                   border: 'none',
                   padding: '12px',
                   borderRadius: '12px',
                   fontSize: '0.9rem',
                   fontWeight: 800,
-                  cursor: 'pointer',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)',
+                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.35)',
                   marginTop: '4px'
                 }}
               >
-                <span>{lang === 'en' ? 'Send OTP & Register' : 'OTP मिळवा व नोंदणी करा'}</span>
-                <ArrowRight size={18} />
-              </button>
-            </form>
-          ) : (
-            /* STEP 2: 4-DIGIT OTP VERIFICATION FORM */
-            <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)', border: '1.5px solid #bfdbfe', borderRadius: '16px', padding: '16px' }}>
-                <div style={{ display: 'inline-flex', background: '#dcfce7', padding: '10px', borderRadius: '50%', color: '#15803d', marginBottom: '8px' }}>
-                  <Phone size={24} />
-                </div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1e293b' }}>
-                  {lang === 'en' ? `OTP Code for +91 ${mobile}:` : `+91 ${mobile} साठी OTP कोड:`}
-                </div>
-                
-                {/* PROMINENT OTP CODE DISPLAY CARD */}
-                <div style={{
-                  background: '#1e1b4b',
-                  color: '#fef08a',
-                  fontSize: '1.6rem',
-                  fontWeight: 900,
-                  letterSpacing: '8px',
-                  padding: '8px 18px',
-                  borderRadius: '14px',
-                  margin: '10px auto 8px auto',
-                  display: 'inline-block',
-                  boxShadow: '0 4px 14px rgba(30, 27, 75, 0.3)',
-                  border: '1.5px solid #6366f1'
-                }}>
-                  {generatedOtp}
-                </div>
-
-                <div style={{ fontSize: '0.74rem', color: '#334155', marginTop: '2px', lineHeight: 1.35, fontWeight: 700 }}>
-                  {lang === 'en' 
-                    ? '📱 Send OTP to your phone via Mobile SMS or WhatsApp below:' 
-                    : '📱 तुमच्या मोबाईलवर मेसेजद्वारे OTP मिळवण्यासाठी खालील पर्याय निवडा:'}
-                </div>
-
-                {/* MOBILE DISPATCH OPTIONS (SMS APP, WHATSAPP, & AUTO-FILL) */}
-                <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginTop: '10px', flexWrap: 'wrap' }}>
-                  {/* REAL MOBILE SMS APP LAUNCHER */}
-                  <a
-                    href={`sms:+91${mobile}?body=${encodeURIComponent(`Anuprita's Kitchen Verification OTP: ${generatedOtp}`)}`}
-                    style={{
-                      background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                      color: 'white',
-                      textDecoration: 'none',
-                      padding: '7px 11px',
-                      borderRadius: '8px',
-                      fontSize: '0.72rem',
-                      fontWeight: 800,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
-                    }}
-                  >
-                    <MessageSquare size={13} />
-                    <span>{lang === 'en' ? '📱 SMS App OTP' : '📱 SMS मेसेज द्वारे OTP'}</span>
-                  </a>
-
-                  {/* WHATSAPP OTP LAUNCHER */}
-                  <a
-                    href={`https://api.whatsapp.com/send?phone=91${mobile}&text=${encodeURIComponent(`Anuprita's Kitchen Verification OTP: ${generatedOtp}`)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
-                      color: 'white',
-                      textDecoration: 'none',
-                      padding: '7px 11px',
-                      borderRadius: '8px',
-                      fontSize: '0.72rem',
-                      fontWeight: 800,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      boxShadow: '0 2px 6px rgba(22, 163, 74, 0.3)'
-                    }}
-                  >
-                    <Phone size={13} />
-                    <span>{lang === 'en' ? '💬 WhatsApp OTP' : '💬 WhatsApp OTP'}</span>
-                  </a>
-
-                  {/* 1-CLICK AUTO FILL */}
-                  <button
-                    type="button"
-                    onClick={() => setOtpCode(generatedOtp)}
-                    style={{
-                      background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
-                      color: 'white',
-                      border: 'none',
-                      padding: '7px 11px',
-                      borderRadius: '8px',
-                      fontSize: '0.72rem',
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      boxShadow: '0 2px 6px rgba(234, 88, 12, 0.3)'
-                    }}
-                  >
-                    <Sparkles size={13} />
-                    <span>{lang === 'en' ? '✨ 1-Click Auto Fill' : '✨ ऑटो-फिल करा'}</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" style={{ textAlign: 'center', display: 'block', fontWeight: 800, color: '#334155' }}>
-                  {lang === 'en' ? 'Enter 4-Digit Verification Code *' : '४-अंकी OTP कोड प्रविष्ट करा *'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  maxLength={4}
-                  autoFocus
-                  className="form-input"
-                  style={{
-                    textAlign: 'center',
-                    fontSize: '1.6rem',
-                    letterSpacing: '12px',
-                    fontWeight: 900,
-                    borderRadius: '12px',
-                    padding: '10px',
-                    border: '2px solid #ea580c',
-                    background: '#fff7ed',
-                    color: '#9a3412'
-                  }}
-                  placeholder="••••"
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                />
-              </div>
-
-              {/* Resend Timer & Button */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOtpStep(false);
-                    setErrorMessage('');
-                  }}
-                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
-                >
-                  ← {lang === 'en' ? 'Change Number' : 'नंबर बदला'}
-                </button>
-
-                {canResend ? (
-                  <button
-                    type="button"
-                    onClick={handleResendOtp}
-                    style={{ background: 'none', border: 'none', color: '#ea580c', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-                  >
-                    <RefreshCw size={12} />
-                    <span>{lang === 'en' ? 'Resend OTP' : 'पुन्हा OTP पाठवा'}</span>
-                  </button>
-                ) : (
-                  <span style={{ color: '#94a3b8', fontWeight: 700 }}>
-                    {lang === 'en' ? `Resend in ${timer}s` : `${timer} सेकांदात पुन्हा पाठवा`}
-                  </span>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={isVerifying}
-                style={{
-                  background: isVerifying ? '#16a34a' : 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
-                  color: 'white',
-                  border: 'none',
-                  padding: '12px',
-                  borderRadius: '12px',
-                  fontSize: '0.92rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.35)'
-                }}
-              >
-                {isVerifying ? (
+                {isLoading ? (
                   <>
                     <RefreshCw size={18} className="spin-icon" />
-                    <span>{lang === 'en' ? 'Verifying...' : 'पडताळणी होत आहे...'}</span>
+                    <span>{lang === 'en' ? 'Saving Profile...' : 'नोंदणी सेव्ह होत आहे...'}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle2 size={18} />
-                    <span>{lang === 'en' ? 'Verify OTP & Complete Signup' : 'OTP पडताळा व साइन अप करा'}</span>
+                    <span>{lang === 'en' ? 'Register & Start Ordering' : 'नोंदणी करा व सुरू करा'}</span>
                   </>
                 )}
               </button>
+
+              <div style={{ textAlign: 'center', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setErrorMessage('');
+                    setInfoMessage('');
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#16a34a',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  {lang === 'en' ? 'Already registered? Click here to login' : 'आधीच नोंदणी केली आहे? लॉगिन करा'}
+                </button>
+              </div>
             </form>
           )}
+
+          {/* Privacy & Account Notice */}
+          <p style={{ fontSize: '0.67rem', color: '#a8a29e', textAlign: 'center', marginTop: '16px', lineHeight: 1.35, marginBottom: 0 }}>
+            {lang === 'en'
+              ? 'Mobile and name entry provides account identification for convenience and order history.'
+              : 'सोयीस्कर प्रवेश: मोबाईल नंबर व नाव तुमची ऑर्डर माहिती आणि हिस्ट्री जोडण्यासाठी वापरले जाते.'}
+          </p>
         </div>
       </div>
     </div>

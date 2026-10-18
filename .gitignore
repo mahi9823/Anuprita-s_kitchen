@@ -27,3 +27,6 @@ dist-ssr
 # Local build and backup files
 *.backup
 *.apk
+# Local APK and OTA bundles
+/public/anupritas_kitchen.apk
+/ota-bundle/

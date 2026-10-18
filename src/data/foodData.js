@@ -340,7 +340,7 @@ export const INITIAL_ITEMS = [
   },
 
   // ====================================================
-  // 2. SNACKS / खमंग नाश्ता (6 Items)
+  // 2. SNACKS / खमंग नाश्ता (7 Items)
   // ====================================================
   {
     id: 'item-kanda-bhaji',
@@ -515,6 +515,35 @@ export const INITIAL_ITEMS = [
     ingredientsMr: ['उकडलेला बटाटा', 'बेसन', 'पाव', 'लसूण चटणी', 'हिरवी मिरची'],
     ingredientsEn: ['Boiled Potato', 'Gram Flour', 'Pav Bun', 'Garlic Chutney', 'Green Chili'],
     extraAddOns: COMMON_SNACK_ADDONS
+  },
+  {
+    id: 'item-pohe-chiwda',
+    titleMr: 'खमंग पोहे चिवडा (Pohe Chiwda)',
+    titleEn: 'Pohe Chiwda',
+    category: 'snacks',
+    price: 480,
+    unit: '१ किलो (1 kg)',
+    unitEn: '1 kg',
+    isVeg: true,
+    isUpvas: false,
+    isBestseller: true,
+    inStock: true,
+    rating: 5.0,
+    reviewsCount: 195,
+    calories: 460,
+    protein: '8g',
+    carbs: '68g',
+    fat: '18g',
+    advanceNoticeMr: 'ताजे तयार केलेले',
+    advanceNoticeEn: 'Freshly Prepared',
+    advanceNoticeDays: 0,
+    publishedAt: new Date().toISOString(),
+    image: '/images/pohe_chivda.jpg',
+    descriptionMr: 'कुरकुरीत पातळ पोहे, तळलेले शेंगदाणे, काजू, सुके खोबरे, कढीपत्ता, हिरवी मिरची व खास मसाल्यांचा खमंग चिवडा (१ किलो पॅक).',
+    descriptionEn: 'Authentic Maharashtrian crisp roasted flattened rice chivda with roasted peanuts, cashews, dry coconut, curry leaves & mild aromatic spices (1 kg pack).',
+    ingredientsMr: ['पातळ पोहे', 'शेंगदाणे', 'काजू', 'सुके खोबरे', 'कढीपत्ता', 'हिरवी मिरची', 'हळद', 'मसाले'],
+    ingredientsEn: ['Flattened Rice (Thin Poha)', 'Peanuts', 'Cashews', 'Dry Coconut Slices', 'Curry Leaves', 'Green Chili', 'Turmeric', 'Special Spices'],
+    extraAddOns: []
   },
 
   // ====================================================

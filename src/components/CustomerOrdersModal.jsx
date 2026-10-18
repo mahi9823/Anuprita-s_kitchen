@@ -60,31 +60,50 @@ export default function CustomerOrdersModal({ currentUser, ordersList, lang, onC
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
             {myOrders.map((ord) => (
-              <div key={ord.orderId} style={{ background: 'white', border: '1px solid #e7e5e4', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div key={ord.orderId || ord.id} style={{ background: 'white', border: '1px solid #e7e5e4', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontWeight: 800, color: '#16a34a', fontSize: '0.85rem' }}>
-                    ID: {ord.orderId}
+                    ID: {ord.orderId || ord.id}
                   </span>
                   <span style={{ background: '#dcfce7', color: '#15803d', fontSize: '0.7rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '3px' }}>
                     <PackageCheck size={11} /> {lang === 'en' ? 'Confirmed' : 'कन्फर्म'}
                   </span>
                 </div>
 
-                <div style={{ fontSize: '0.78rem', color: '#78716c', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ fontSize: '0.75rem', color: '#78716c', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Clock size={11} />
-                  <span>{ord.date}</span>
+                  <span>{ord.date} {ord.time ? `• ${ord.time}` : ''}</span>
                 </div>
 
-                <div style={{ borderTop: '1px dashed #e7e5e4', paddingTop: '6px', fontSize: '0.82rem', color: '#44403c' }}>
-                  {ord.items.map((it, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', margin: '2px 0' }}>
-                      <span>• {lang === 'en' ? it.titleEn : it.titleMr} (x{it.qty})</span>
-                      <span style={{ fontWeight: 700 }}>₹{it.subtotal}</span>
+                {ord.recipientName && (
+                  <div style={{ background: '#fef3c7', padding: '4px 8px', borderRadius: '6px', fontSize: '0.72rem', color: '#92400e', fontWeight: 700 }}>
+                    🎁 {lang === 'en' ? 'Deliver to:' : 'स्वीकारणारा:'} {ord.recipientName} (+91 {ord.recipientPhone})
+                  </div>
+                )}
+
+                {ord.customerAddress && (
+                  <div style={{ fontSize: '0.72rem', color: '#57534e', display: 'flex', alignItems: 'flex-start', gap: '4px' }}>
+                    <MapPin size={11} style={{ flexShrink: 0, marginTop: '2px', color: '#ea580c' }} />
+                    <span style={{ lineHeight: 1.3 }}>{ord.customerAddress}</span>
+                  </div>
+                )}
+
+                <div style={{ borderTop: '1px dashed #e7e5e4', paddingTop: '6px', fontSize: '0.8rem', color: '#44403c' }}>
+                  {Array.isArray(ord.items) && ord.items.length > 0 ? (
+                    ord.items.map((it, idx) => (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', margin: '2px 0' }}>
+                        <span>• {lang === 'en' ? (it.titleEn || it.titleMr) : (it.titleMr || it.titleEn)} (x{it.qty})</span>
+                        <span style={{ fontWeight: 700 }}>₹{it.subtotal}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ fontSize: '0.75rem', color: '#78716c' }}>
+                      {ord.itemsSummary || 'Standard order items'}
                     </div>
-                  ))}
+                  )}
                 </div>
 
-                <div style={{ borderTop: '1px solid #e7e5e4', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '0.9rem' }}>
+                <div style={{ borderTop: '1px solid #e7e5e4', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '0.88rem' }}>
                   <span>{lang === 'en' ? 'Total Amount:' : 'एकूण रक्कम:'}</span>
                   <span style={{ color: '#16a34a' }}>₹{ord.total}</span>
                 </div>

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { X, Lock, ShieldCheck } from 'lucide-react';
 import { signInOwner } from '../services/ownerAuth';
+import { recordUserLogin } from '../services/userService';
 
 export default function OwnerPinModal({ lang, onClose, onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -16,6 +17,12 @@ export default function OwnerPinModal({ lang, onClose, onLoginSuccess }) {
 
     try {
       const user = await signInOwner(email.trim(), password);
+      if (user?.id) {
+        recordUserLogin({
+          id: user.id,
+          role: 'owner'
+        }).catch((err) => console.warn('[OwnerPinModal] Error recording owner login:', err));
+      }
       onLoginSuccess(user);
     } catch (error) {
       setErrorMsg(error.message || 'Login failed. Please try again.');
