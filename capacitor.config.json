@@ -1,5 +1,12 @@
+
 {
   "appId": "com.anupritakitchen.app",
   "appName": "Anuprita's Kitchen",
-  "webDir": "dist"
+  "webDir": "dist",
+  "plugins": {
+    "OtaKit": {
+      "appId": "92b5f8da-2686-4c39-8ce5-a77e29278cee"
+    }
+  }
 }
+
